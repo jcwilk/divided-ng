@@ -110,8 +110,7 @@ class Round
     killed_players.each(&:kill)
     settled_move_map.each {|p,m| @attacked_map[p] = true if m.action == 'attack' }
 
-    # UPGRADING: put a broadcast here for sending data for the next round
-    # RoomEventsController.publish('/room_events/advance', current_data.to_json)
+    broadcast_current_data
   end
 
   def new_player
@@ -173,6 +172,10 @@ class Round
   end
 
   private
+
+  def broadcast_current_data
+    ActionCable.server.broadcast "room_channel", current_data.json
+  end
 
   def participating_players
     init_pos_map.keys
