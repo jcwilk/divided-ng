@@ -1,0 +1,46 @@
+require "rails_helper"
+
+describe RoundSequence do
+  context "when new" do
+    its(:started?) { is_expected.to be false }
+
+    it "raises when interacting with rounds" do
+      expect { subject.advance }.to raise_error(RoundSequence::NotStartedError)
+    end
+  end
+
+  context "when started with a RoomParticipant" do
+    let(:user) { User.new }
+    let(:room_participant) { RoomParticipant.new(user) }
+    let(:room) { Room.new }
+
+    def start
+      subject.start(room_participant: room_participant, room: room)
+    end
+
+    before do
+      start
+    end
+
+    its(:started?) { is_expected.to be true }
+
+    it "returns a new round containing the RoomParticipant" do
+      round = subject.current_round
+      expect(round.participants.map(&:user_uuid)).to include(user.uuid)
+    end
+
+    it "raises if started again" do
+      expect { start }.to raise_error(RoundSequence::AlreadyStartedError)
+    end
+
+    context "when advancing" do
+      def advance
+        subject.advance
+      end
+
+      it "assigns a new round" do
+        expect { advance }.to change { subject.current_round.uuid }
+      end
+    end
+  end
+end

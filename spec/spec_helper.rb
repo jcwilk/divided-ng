@@ -49,8 +49,8 @@ RSpec.configure do |config|
   config.include(EMSpecRunner::Mixin)
 
   config.before(:each) do
-    Round.reset
-    Player.reset
+    #Round.reset
+    #Player.reset
     Timecop.return
   end
 
