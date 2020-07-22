@@ -5,10 +5,13 @@
 # The data it holds does not follow the player as they leave the room
 
 class RoomParticipant
+  attr_reader :uuid
+
   delegate :uuid, to: :user, prefix: true
 
   def initialize(user)
     self.user = user
+    @uuid = SecureRandom.uuid
   end
 
   private

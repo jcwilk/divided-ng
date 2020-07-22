@@ -1,10 +1,15 @@
 class Move < Hashie::Dash
-  property :player_uuid, required: true
+  property :uuid
   property :x, required: true
   property :y, required: true
-  property :id, required: true
-  property :round_id, required: true
   property :action, required: true
+
+  def initialize(**args)
+    super
+    self.uuid = SecureRandom.uuid
+
+    raise "invalid x,y: #{properties.inspect}" if !valid?
+  end
 
   def valid?
     x >= 0 && x <= 9 &&

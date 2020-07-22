@@ -6,13 +6,13 @@
 # It holds the moves available to reach the next round
 
 class RoundParticipant
+  attr_reader :move, :room_participant, :moves
+  attr_accessor :moves
+
   delegate :user_uuid, to: :room_participant
 
-  def initialize(room_participant)
-    self.room_participant = room_participant
+  def initialize(room_participant, move:)
+    @room_participant = room_participant
+    @move = move
   end
-
-  private
-
-  attr_accessor :room_participant
 end
