@@ -48,7 +48,7 @@ class Round
   def fill_in_participant_moves(room)
     participants.each do |participant|
       participant.moves = MovesGenerator.call(
-        participant: participant,
+        participant,
         participants: participants,
         room: room
       )
