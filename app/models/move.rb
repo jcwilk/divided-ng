@@ -1,4 +1,6 @@
 class Move < Hashie::Dash
+  IDLE_ACTION = "wait"
+
   property :uuid
   property :x, required: true
   property :y, required: true
