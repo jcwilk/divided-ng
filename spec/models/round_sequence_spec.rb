@@ -2,21 +2,21 @@ require "rails_helper"
 
 describe RoundSequence do
   let(:user) { User.new }
-  let(:room_participant) { RoomParticipant.new(user) }
-  let(:room) { Room.new }
+  let(:room_participant) { RoomParticipant.new(user, floor: floor) }
+  let(:floor) { {} }
 
   context "when new" do
     its(:started?) { is_expected.to be false }
 
     it "raises when interacting with rounds" do
-      expect { subject.advance(room_participants: [room_participant], room: room) }.to raise_error(RoundSequence::NotStartedError)
+      expect { subject.advance(room_participants: [room_participant]) }.to raise_error(RoundSequence::NotStartedError)
     end
   end
 
   context "when started with a RoomParticipant" do
 
     def start
-      subject.start(room_participant: room_participant, room: room)
+      subject.start(room_participant: room_participant)
     end
 
     before do
@@ -36,7 +36,7 @@ describe RoundSequence do
 
     context "when advancing" do
       def advance
-        subject.advance(room_participants: [room_participant], room: room)
+        subject.advance(room_participants: [room_participant])
       end
 
       it "assigns a new round" do

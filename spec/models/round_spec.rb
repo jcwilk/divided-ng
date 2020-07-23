@@ -3,10 +3,11 @@ require 'rails_helper'
 describe Round do
   let(:room) { Room.new }
   let(:user) { User.new }
-  let(:participant) { RoomParticipant.new(user) }
+  let(:floor) { {} }
+  let(:participant) { RoomParticipant.new(user, floor: floor) }
 
   def start
-    Round.start(room_participant: participant, room: room)
+    Round.start(room_participant: participant)
   end
 
   describe "Round.start" do
@@ -26,7 +27,7 @@ describe Round do
   end
 
   describe "advance" do
-    subject { round.advance(room_participants: room_participants, room: room, move_selections: move_selections) }
+    subject { round.advance(room_participants: room_participants, move_selections: move_selections) }
 
     let(:round) { start }
     let(:room_participants) { [participant] }
@@ -63,7 +64,7 @@ describe Round do
 
     context "for joining users" do
       let(:new_user) { User.new }
-      let(:new_participant) { RoomParticipant.new(new_user) }
+      let(:new_participant) { RoomParticipant.new(new_user, floor: floor) }
       let(:room_participants) { super() + [new_participant] }
 
       it "has the joining participant included in the participants" do

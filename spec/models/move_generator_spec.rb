@@ -1,11 +1,14 @@
 require 'rails_helper'
 
 describe MoveGenerator do
-  let(:uuid) { 'some_uuid' }
-  let(:enemy_uuid) { 'enemy_uuid' }
-  let(:player) { double(uuid: uuid) }
-  let(:participant) { double(player: player, attacked_recently?: false) }
-  let(:enemy) { double(uuid: enemy_uuid) }
+  let(:player_coords) { {x: 0, y: 0} }
+  let(:last_player_move) { Move.new(action: Move::IDLE_ACTION, x: player_coords.x, y: player_coords.y) }
+  let(:player) { RoundParticipant.new(RoomParticipant.new(User.new)) }
+
+  let(:enemy_coords) { {x: 5, y: 5} }
+  let(:last_enemy_move) { Move.new(action: Move::IDLE_ACTION, x: enemy_coords.x, y: enemy_coords.y) }
+  let(:enemy) { RoundParticipant.new(RoomParticipant.new(User.new)) }
+
   let(:init_pos_map) {{
     player => [0,0]
   }}
@@ -75,7 +78,7 @@ describe MoveGenerator do
         let(:init_pos_map) {{
           player => [1,1],
           enemy => [2,2]
-        }}        
+        }}
 
         it 'includes attack actions for the tiles adjacent to the enemy' do
           expect(subject.any? {|m| m.x == 1 && m.y == 3 && m.action == 'attack' }).to eql(true)

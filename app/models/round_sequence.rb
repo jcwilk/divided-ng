@@ -26,13 +26,12 @@ class RoundSequence
     rounds.last
   end
 
-  def advance(room_participants:, room:)
+  def advance(room_participants:)
     assert_started
 
     rounds << current_round.advance(
       room_participants: room_participants,
-      move_selections: move_selections,
-      room: room
+      move_selections: move_selections
     )
 
     reset_move_selections
