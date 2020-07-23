@@ -50,6 +50,9 @@ RSpec.configure do |config|
   # require 'support/em_spec_runner'
   # config.include(EMSpecRunner::Mixin)
 
+  require "support/debug_helper"
+  config.include DebugHelper
+
   config.before(:each) do
     #Round.reset
     #Player.reset
