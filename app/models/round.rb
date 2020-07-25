@@ -79,7 +79,7 @@ class Round
     room_participants.reject { |p| participating_uuids.include?(p.user_uuid) }.map do |room_participant|
       RoundParticipant.new(
         room_participant,
-        move: JoinGenerator.call(room_participant)
+        move: JoinGenerator.call
       )
     end
   end

@@ -3,25 +3,45 @@ class MovesGenerator
     new(*args).call
   end
 
-  attr_accessor :player, :others, :floor
+  attr_accessor :player, :others
+
+  delegate :floor, to: :player
 
   def initialize(player, participants:)
     self.player = player
     self.others = participants - [player]
-    self.floor = player.floor
   end
 
   def call
-    [Move.new(x: 0, y: 0, action: "wait")]
+    surrounding_moves
   end
 
   private
 
-  def check_enemy_adjacent(x, y)
-    others.any? { |o| (o.x - x).abs <= 1 && (o.y - y).abs <= 1 }
+  def surrounding_moves
+    permutations = ((player.x - 3)..(player.x + 3)).to_a.product ((player.y - 3)..(player.y + 3)).to_a
+
+    permutations.
+      map { |x, y| Coord.new(x, y) }.
+      select { |coord| xy_open?(coord) }.
+      map { |coord| coord_to_action(coord) }
   end
 
-  def check_xy_open(x, y)
-    floor.check_xy_open(x, y) && others.none? { |o| o.x == x && o.y == y }
+  def coord_to_action(coord)
+    if coord == player.coord
+      WaitGenerator.call(coord)
+    elsif enemy_adjacent?(coord)
+      AttackGenerator.call(coord)
+    else
+      RunGenerator.call(coord)
+    end
+  end
+
+  def enemy_adjacent?(coord)
+    others.any? { |o| (o.x - coord.x).abs <= 1 && (o.y - coord.y).abs <= 1 }
+  end
+
+  def xy_open?(coord)
+    floor.open?(coord) && others.none? { |o| o.coord == coord }
   end
 end

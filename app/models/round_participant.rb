@@ -9,6 +9,7 @@ class RoundParticipant
   attr_reader :move, :room_participant, :moves
 
   delegate :user_uuid, :floor, to: :room_participant
+  delegate :x, :y, :coord, to: :move
 
   def initialize(room_participant, move:)
     @room_participant = room_participant

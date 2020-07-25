@@ -1,115 +1,87 @@
-require 'rails_helper'
+require "rails_helper"
 
-describe MoveGenerator do
-  let(:player_coords) { {x: 0, y: 0} }
+describe MovesGenerator do
+  let(:player_coords) { Coord.new(0, 0) }
   let(:last_player_move) { Move.new(action: Move::IDLE_ACTION, x: player_coords.x, y: player_coords.y) }
-  let(:player) { RoundParticipant.new(RoomParticipant.new(User.new)) }
+  let(:player) { Junk.round_participant(move: last_player_move) }
+  let(:participants) { [player] }
 
-  let(:enemy_coords) { {x: 5, y: 5} }
-  let(:last_enemy_move) { Move.new(action: Move::IDLE_ACTION, x: enemy_coords.x, y: enemy_coords.y) }
-  let(:enemy) { RoundParticipant.new(RoomParticipant.new(User.new)) }
+  let(:gen) { described_class.new(player, participants: participants) }
 
-  let(:init_pos_map) {{
-    player => [0,0]
-  }}
-  let(:round) { double(init_pos_map: init_pos_map, index: 5) }
-  let(:gen) { MoveGenerator.new(participant: participant, round: round) }
+  describe "moves" do
+    subject { gen.call }
 
-  describe 'stationary_move' do
-    subject { gen.stationary_move }
-
-    it 'has an action of "wait"' do
-      expect(subject.action).to eql('wait')
+    it "has a wait move keeping the player stationary" do
+      has_wait = subject.any? do |m|
+        m.action == "wait" &&
+          m.x == player_coords.x &&
+          m.y == player_coords.y
+      end
+      expect(has_wait).to eq true
     end
 
-    it 'has coordinates matching those of the player' do
-      expect([subject.x,subject.y]).to eql(init_pos_map[player])
-    end
-  end
-
-  describe 'moves' do
-    subject { gen.moves }
-
-    it 'does not include out of bounds moves' do
+    it "does not include out of bounds moves" do
       expect(subject.any? {|m| m.x == -1 && m.y == -1 }).to eql(false)
     end
 
-    it 'returns moves in a consistent order' do
-      expect(subject).to eql(gen.moves)
+    it "returns moves in a consistent order" do
+      expect(subject.map(&:action)).to eql(gen.call.map(&:action))
     end
 
-    it 'does not include the spot they stand on' do
-      expect(subject.any? {|m| [m.x,m.y] == [0,0] }).to eql(false)
+    it "does not include the spot they stand on aside from wait" do
+      expect(subject.any? { |m| m.action != "wait" && [m.x, m.y] == [0,0] }).to eql(false)
     end
 
-    context 'for someone in the corner' do
-      it 'does not include out of bound spots' do
-        expect(subject.any? {|m| m.x == -1 }).to eql(false)
+    context "for someone in the corner" do
+      it "does not include out of bound spots" do
+        expect(subject.any? { |m| m.x == -1 }).to eql(false)
       end
     end
 
-    context 'for someone in the middle' do
-      let(:init_pos_map) {{
-        player => [5,5]
-      }}
+    context "for someone in the middle" do
+      let(:player_coords) { Hashie::Mash.new(x: 5, y: 5) }
 
-      it 'includes a full radius around them' do
-        expect(subject.size).to eql(48)
+      it "includes a full radius around them" do
+        expect(subject.size).to eql(49)
       end
     end
 
-    describe 'with a nearby opponent' do
-      let(:init_pos_map) {{
-        player => [0,0],
-        enemy => [2,2]
-      }}
+    describe "with a nearby opponent" do
+      let(:enemy_coords) { Coord.new(2, 2) }
+      let(:last_enemy_move) { Move.new(action: Move::IDLE_ACTION, x: enemy_coords.x, y: enemy_coords.y) }
+      let(:enemy) { Junk.round_participant(move: last_enemy_move) }
+      let(:participants) { [player, enemy] }
 
-      it 'does not include actions for the enemy occupied tile' do
+      it "does not include actions for the enemy occupied tile" do
         expect(subject.any? {|m| m.x == 2 && m.y == 2 }).to eql(false)
       end
 
-      context 'when the enemy is not adjacent' do
-        it 'does not include attack actions for the tiles adjacent to the enemy' do
+      it "does not return moves on the other side of the enemy" do
+        pending "need to integrate a collision simulator"
+        expect(subject.any? {|m| m.x == 3 && m.y == 3 }).to eql(false)
+      end
+
+      context "when the enemy is not adjacent" do
+        it "does not include attack actions for the tiles adjacent to the enemy" do
+          pending "need to change behavior when near an enemy"
           expect(subject.any? {|m| m.x == 1 && m.y == 3 && m.action == 'attack' }).to eql(false)
         end
       end
 
-      context 'when the enemy is adjacent' do
-        let(:init_pos_map) {{
-          player => [1,1],
-          enemy => [2,2]
-        }}
+      context "when the enemy is adjacent" do
+        let(:player_coords) { Coord.new(1,1) }
 
-        it 'includes attack actions for the tiles adjacent to the enemy' do
+        it "includes attack actions for the tiles adjacent to the enemy" do
           expect(subject.any? {|m| m.x == 1 && m.y == 3 && m.action == 'attack' }).to eql(true)
         end
 
-        it 'does not include run actions for the tiles adjacent to the enemy' do
+        it "does not include run actions for the tiles adjacent to the enemy" do
           expect(subject.any? {|m| m.x == 1 && m.y == 2 && m.action == 'run' }).to eql(false)
         end
 
-        it 'only includes adjacent run actions' do
+        it "only includes adjacent run actions" do
+          pending "need to lower radius to 1 when there's an adjacent enemy"
           expect(subject.any? {|m| m.action == 'run' && ((m.x - 1).abs > 1 || (m.y - 1).abs > 1) }).to eql(false)
-        end
-      end
-
-      context 'when the collision sim does not return collisions' do
-        before do
-          allow_any_instance_of(CollisionSimulator).to receive(:collisions).and_return([])
-        end
-
-        it 'returns moves on the other side of the enemy' do
-          expect(subject.any? {|m| m.x == 3 && m.y == 3 }).to eql(true)
-        end
-      end
-
-      context 'when the collision sim does return collisions' do
-        it 'does not return moves on the other side of the enemy' do
-          expect(subject.any? {|m| m.x == 3 && m.y == 3 }).to eql(false)
-        end
-
-        it 'does return moves in front of the enemy' do
-          expect(subject.any? {|m| m.x == 1 && m.y == 1 }).to eql(true)
         end
       end
     end

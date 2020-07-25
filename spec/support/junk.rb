@@ -11,7 +11,7 @@ module Junk
   end
 
   def self.floor
-    {}
+    Floor.new
   end
 
   def self.room_participant(user: Junk.user)
@@ -20,5 +20,13 @@ module Junk
 
   def self.round(room_participant: Junk.room_participant)
     Round.start(room_participant: room_participant)
+  end
+
+  def self.move
+    JoinGenerator.call
+  end
+
+  def self.round_participant(room_participant = Junk.room_participant, move: Junk.move)
+    RoundParticipant.new(room_participant, move: move)
   end
 end
