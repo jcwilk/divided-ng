@@ -3,20 +3,16 @@ class Round
 
   def self.start(room_participant:)
     new(
-      participants: [
-        RoundParticipant.new(
-          room_participant,
-          move: JoinGenerator.call(room_participant)
-        )
-      ]
+      participants: []
+    ).advance(
+      room_participants: [room_participant],
+      move_selections: []
     )
   end
 
   def initialize(participants:)
     @uuid = SecureRandom.uuid
     @participants = participants
-
-    fill_in_participant_moves
   end
 
   def join(participant)
@@ -42,28 +38,31 @@ class Round
 
   private
 
-  def fill_in_participant_moves
-    participants.each do |participant|
-      # TODO: fix this circular reference - shouldn't need participants to fill out the same participants
+  def participating_uuids
+    participants.map(&:user_uuid)
+  end
+
+  def next_participants(room_participants:, move_selections:)
+    next_participants = continuing_participants(room_participants: room_participants, move_selections: move_selections)
+    next_participants += joining_participants(room_participants: room_participants)
+
+    next_participants.each do |participant|
       participant.moves = MovesGenerator.call(
         participant,
-        participants: participants
+        participants: next_participants
       )
     end
   end
 
-  def next_participants(room_participants:, move_selections:)
-    continuing_user_uuids = participants.map(&:user_uuid)
-    continuing_room_participants = room_participants.select { |p| continuing_user_uuids.include?(p.user_uuid) }
-
-    next_participants = continuing_room_participants.map do |room_participant|
+  def continuing_participants(room_participants:, move_selections:)
+    room_participants.select { |p| participating_uuids.include?(p.user_uuid) }.map do |room_participant|
       move_selection = move_selections.find { |ms| ms.user_uuid == room_participant.user_uuid }
       old_round_participant = participants.find { |p| p.user_uuid == room_participant.user_uuid }
-      selected_move = old_round_participant.moves.find do |m|
+      selected_move = old_round_participant.moves.find do |move|
         if move_selection
-          m.uuid == move_selection.move_uuid
+          move.uuid == move_selection.move_uuid
         else
-          m.action == Move::IDLE_ACTION
+          move.action == Move::IDLE_ACTION
         end
       end
 
@@ -72,10 +71,10 @@ class Round
         move: selected_move
       )
     end
+  end
 
-    new_room_participants = room_participants - continuing_room_participants
-
-    next_participants += new_room_participants.map do |room_participant|
+  def joining_participants(room_participants:)
+    room_participants.reject { |p| participating_uuids.include?(p.user_uuid) }.map do |room_participant|
       RoundParticipant.new(
         room_participant,
         move: JoinGenerator.call(room_participant)
