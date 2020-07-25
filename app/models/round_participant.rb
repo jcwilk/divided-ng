@@ -7,12 +7,28 @@
 
 class RoundParticipant
   attr_reader :move, :room_participant, :moves
-  attr_accessor :moves
 
   delegate :user_uuid, :floor, to: :room_participant
 
   def initialize(room_participant, move:)
     @room_participant = room_participant
     @move = move
+  end
+
+  def moves
+    raise "moves not yet assigned!" if @moves.nil?
+
+    @moves
+  end
+
+  def moves=(moves)
+    raise "moves assigned when moves already exist!" if @moves
+    raise "empty moves assigned!" if moves.nil?
+
+    @moves = moves
+  end
+
+  def finalized?
+    !!@moves
   end
 end

@@ -11,6 +11,8 @@ class Round
   end
 
   def initialize(participants:)
+    raise "participants which haven't been finalized passed into a new round!" if !participants.all?(&:finalized?)
+
     @uuid = SecureRandom.uuid
     @participants = participants
   end
