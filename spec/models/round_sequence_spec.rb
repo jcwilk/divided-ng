@@ -1,9 +1,8 @@
 require "rails_helper"
 
 describe RoundSequence do
-  let(:user) { User.new }
-  let(:room_participant) { RoomParticipant.new(user, floor: floor) }
-  let(:floor) { {} }
+  let(:user) { Junk.user }
+  let(:room_participant) { Junk.room_participant(user: user) }
 
   context "when new" do
     its(:started?) { is_expected.to be false }
@@ -14,7 +13,6 @@ describe RoundSequence do
   end
 
   context "when started with a RoomParticipant" do
-
     def start
       subject.start(room_participant: room_participant)
     end
