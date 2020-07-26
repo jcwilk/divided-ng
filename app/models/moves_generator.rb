@@ -29,11 +29,11 @@ class MovesGenerator
 
   def coord_to_action(coord)
     if coord == player.coord
-      WaitGenerator.call(coord)
+      MoveGenerator::Wait.call(coord)
     elsif enemy_adjacent?(coord)
-      AttackGenerator.call(coord)
+      MoveGenerator::Attack.call(coord)
     else
-      RunGenerator.call(coord)
+      MoveGenerator::Run.call(coord)
     end
   end
 

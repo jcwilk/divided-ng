@@ -5,7 +5,7 @@
 # It holds the move made to reach this round
 # It holds the moves available to reach the next round
 
-class RoundParticipant
+class RoundParticipant < MemoryModel
   attr_reader :move, :room_participant, :moves
 
   delegate :user_uuid, :floor, to: :room_participant

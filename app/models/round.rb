@@ -1,5 +1,5 @@
-class Round
-  attr_reader :participants, :uuid
+class Round < MemoryModel
+  attr_reader :participants
 
   def self.start(room_participant:)
     new(
@@ -13,7 +13,7 @@ class Round
   def initialize(participants:)
     raise "participants which haven't been finalized passed into a new round!" if !participants.all?(&:finalized?)
 
-    @uuid = SecureRandom.uuid
+    super
     @participants = participants
   end
 
@@ -79,7 +79,7 @@ class Round
     room_participants.reject { |p| participating_uuids.include?(p.user_uuid) }.map do |room_participant|
       RoundParticipant.new(
         room_participant,
-        move: JoinGenerator.call
+        move: MoveGenerator::Join.call
       )
     end
   end

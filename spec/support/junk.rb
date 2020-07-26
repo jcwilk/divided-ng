@@ -23,7 +23,7 @@ module Junk
   end
 
   def self.move
-    JoinGenerator.call
+    MoveGenerator::Join.call
   end
 
   def self.round_participant(room_participant = Junk.room_participant, move: Junk.move)
