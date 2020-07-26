@@ -11,9 +11,9 @@ module DV
         build_url(opts,'/dv/rooms')
       end
 
-      link :swagger_doc do |opts|
-        build_url(opts,'/dv/swagger_doc')
-      end
+      # link :swagger_doc do |opts|
+      #   build_url(opts,'/dv/swagger_doc')
+      # end
     end
   end
 end

@@ -3,6 +3,18 @@ require 'rails_helper'
 describe 'divided hypermedia' do
   #TODO: as this grows, split it into separate files
 
+  def client(url = 'http://api.example.com/dv')
+    HyperResource.new(
+      root: url,
+      faraday_options: {
+        builder: Faraday::RackBuilder.new do |builder|
+          builder.request :url_encoded
+          builder.adapter :rack, app
+        end
+      }
+    )
+  end
+
   describe 'utlities' do
     describe 'rendering an object' do
       subject { DV::Representers::Round.render(Junk.round) }
@@ -19,8 +31,7 @@ describe 'divided hypermedia' do
 
   context 'retrieving the current round data for a room' do
     subject do
-      # TODO: Feed this into hyperresource and find the round
-      DV::Representers::Room.render(Junk.room)
+      client.rooms.first.current_round
     end
 
     it 'returns the round data' do

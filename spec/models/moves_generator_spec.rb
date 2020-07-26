@@ -14,8 +14,7 @@ describe MovesGenerator do
     it "has a wait move keeping the player stationary" do
       has_wait = subject.any? do |m|
         m.action == "wait" &&
-          m.x == player_coords.x &&
-          m.y == player_coords.y
+          m.coord == player.coord
       end
       expect(has_wait).to eq true
     end

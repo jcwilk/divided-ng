@@ -10,24 +10,25 @@ class RoundSequence
 
   def initialize
     @uuid = SecureRandom.uuid
-    self.rounds = []
+    self.rounds = [Round.start]
+
     reset_move_selections
   end
 
-  def start(**args)
-    assert_not_started
+  # def start(**args)
+  #   assert_not_started
 
-    rounds << Round.start(**args)
-  end
+  #   rounds << Round.start(**args)
+  # end
 
   def current_round
-    assert_started
+    # assert_started
 
     rounds.last
   end
 
   def advance(room_participants:)
-    assert_started
+    # assert_started
 
     rounds << current_round.advance(
       room_participants: room_participants,
@@ -37,9 +38,9 @@ class RoundSequence
     reset_move_selections
   end
 
-  def started?
-    rounds.present?
-  end
+  # def started?
+  #   rounds.present?
+  # end
 
   private
 
@@ -49,11 +50,11 @@ class RoundSequence
     self.move_selections = []
   end
 
-  def assert_started
-    raise NotStartedError if !started?
-  end
+  # def assert_started
+  #   raise NotStartedError if !started?
+  # end
 
-  def assert_not_started
-    raise AlreadyStartedError if started?
-  end
+  # def assert_not_started
+  #   raise AlreadyStartedError if started?
+  # end
 end

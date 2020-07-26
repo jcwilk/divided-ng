@@ -37,6 +37,7 @@ group :development do
 end
 
 group :test do
+  gem "hyperresource"
   gem "mock_em"
   gem "rspec-its"
 end

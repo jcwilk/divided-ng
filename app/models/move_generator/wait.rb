@@ -4,7 +4,7 @@ class MoveGenerator
       Move.new(
         x: coord.x,
         y: coord.y,
-        action: "wait"
+        action: Move::IDLE_ACTION
       )
     end
   end

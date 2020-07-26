@@ -1,12 +1,9 @@
 class Round < MemoryModel
   attr_reader :participants
 
-  def self.start(room_participant:)
+  def self.start
     new(
       participants: []
-    ).advance(
-      room_participants: [room_participant],
-      move_selections: []
     )
   end
 
@@ -21,7 +18,7 @@ class Round < MemoryModel
     @participants << participant
   end
 
-  def advance(room_participants:, move_selections:)
+  def advance(room_participants:, move_selections: [])
     self.class.new(
       participants: next_participants(
         room_participants: room_participants,
@@ -66,6 +63,10 @@ class Round < MemoryModel
         else
           move.action == Move::IDLE_ACTION
         end
+      end
+
+      if selected_move.nil?
+        raise "failed to find selected move! #{move_selection ? "did have selection" : "did not have selection"}"
       end
 
       RoundParticipant.new(

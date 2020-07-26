@@ -19,6 +19,6 @@ module DV
     mount DV::Round
     mount DV::Join
 
-    add_swagger_documentation api_version: 'v1'
+    # add_swagger_documentation api_version: 'v1'
   end
 end

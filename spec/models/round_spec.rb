@@ -6,32 +6,24 @@ describe Round do
   let(:participant) { Junk.room_participant(user: user) }
 
   def start
-    Round.start(room_participant: participant)
+    Round.start
   end
 
   describe "Round.start" do
     subject { start }
 
-    it "has the passed participant as the only participant" do
-      expect(subject.participants.map(&:user_uuid)).to eq [user.uuid]
-    end
-
-    it "has join as the participant's action" do
-      expect(subject.participant_by_user_uuid(user.uuid).move.action).to eq "join"
-    end
-
-    it "has moves available for the participant" do
-      expect(subject.moves_by_user_uuid(user.uuid)).to be_present
+    it "has no participants" do
+      expect(subject.participants).to be_empty
     end
   end
 
   describe "advance" do
     subject { round.advance(room_participants: room_participants, move_selections: move_selections) }
 
-    let(:round) { start }
     let(:room_participants) { [participant] }
-    let(:selected_move) { round.moves_by_user_uuid(user.uuid).first }
     let(:move_selections) { [MoveSelection.new(move_uuid: selected_move.uuid, user_uuid: user.uuid)] }
+    let(:selected_move) { round.moves_by_user_uuid(user.uuid).first }
+    let(:round) { start.advance(room_participants: [participant]) }
 
     context "for continuing users" do
       it "keeps the same user in the new round" do
