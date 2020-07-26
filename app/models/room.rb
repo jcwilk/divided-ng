@@ -7,9 +7,13 @@ class Room < MemoryModel
     def by_uuid(uuid)
       all.find {|r| r.uuid == uuid }
     end
+
+    def reset
+      @all = [new]
+    end
   end
 
-  delegate :current_round, to: :round_sequence
+  delegate :current_round, :advance, to: :round_sequence
 
   def initialize
     super

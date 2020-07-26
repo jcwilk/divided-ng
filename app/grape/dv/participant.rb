@@ -10,10 +10,10 @@ module DV
         end
 
         get do
-          #TODO: make this specific to a round
-          # will require returning the current round and next round
-          # in the round advancement event to the client
-          # since the next round will have all the next moves
+          # TODO: Update this to the new system
+          # we might need MemoryModel pooling now to find by id
+          # or it could represent the full path in the url
+          # /rooms/:room_id/rounds/:round_id/participants/:participant_id
           player = ::Player.alive_by_uuid(params[:id])
           if player.nil?
             error! 'Participant not found!', 404

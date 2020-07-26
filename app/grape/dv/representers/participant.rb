@@ -4,6 +4,7 @@ module DV
       include DV::Representers::Base
 
       property :uuid
+      property :user_uuid
 
       link :self do |opts|
         build_url(opts,"/dv/participant/#{uuid}")

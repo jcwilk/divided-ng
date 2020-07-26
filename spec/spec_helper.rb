@@ -54,6 +54,7 @@ RSpec.configure do |config|
   config.include DebugHelper
 
   config.before(:each) do
+    Room.reset
     #Round.reset
     #Player.reset
     #Timecop.return

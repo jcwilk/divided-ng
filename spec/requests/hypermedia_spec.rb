@@ -15,6 +15,24 @@ describe 'divided hypermedia' do
     )
   end
 
+  def first_room
+    client.dv_rooms.first
+  end
+
+  def current_round
+    first_room.dv_current_round
+  end
+
+  def available_moves(uuid)
+    p = get_participant_by_uuid(uuid)
+    fail "Participant not found!" if p.nil?
+    p.dv_moves.to_a
+  end
+
+  def get_participant_by_uuid(uuid)
+    current_round.participants.find {|p| p.user_uuid == uuid }
+  end
+
   describe 'utlities' do
     describe 'rendering an object' do
       subject { DV::Representers::Round.render(Junk.round) }
@@ -31,7 +49,7 @@ describe 'divided hypermedia' do
 
   context 'retrieving the current round data for a room' do
     subject do
-      client.rooms.first.current_round
+      current_round
     end
 
     it 'returns the round data' do
@@ -40,21 +58,18 @@ describe 'divided hypermedia' do
   end
 
   context 'retrieving available moves for a player' do
-    #em_around
-
-    before do
-      @player = Round.new_player
-      Timecop.travel(Time.now+Round::ROUND_DURATION+1)
-    end
+    let(:participant) { Junk.room_participant }
 
     subject do
-      available_moves(@player.uuid)
+      available_moves(participant.user_uuid)
+    end
+
+    before do
+      Room.all.first.advance(room_participants: [participant])
     end
 
     it 'provides a list of available moves' do
-      finish_after_round do
-        expect(subject.count).to be > 3
-      end
+      expect(subject.count).to be > 3
     end
 
     context 'and submitting one of them' do
@@ -63,9 +78,7 @@ describe 'divided hypermedia' do
       end
 
       it 'advances the round' do
-        finish_after_round do
-          expect{ submit_move }.to change { Round.current_number }.by(1)
-        end
+        expect{ submit_move }.to change { current_round.uuid }
       end
     end
   end
