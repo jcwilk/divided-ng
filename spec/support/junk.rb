@@ -14,8 +14,8 @@ module Junk
     Floor.new
   end
 
-  def self.room_participant(user: Junk.user)
-    RoomParticipant.new(user, floor: floor)
+  def self.room_participant(user: Junk.user, room: Junk.room)
+    RoomParticipant.new(user, floor: floor, room_uuid: room.uuid)
   end
 
   def self.round(room_participant: Junk.room_participant)

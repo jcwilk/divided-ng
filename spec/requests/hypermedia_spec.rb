@@ -58,14 +58,15 @@ describe 'divided hypermedia' do
   end
 
   context 'retrieving available moves for a player' do
-    let(:participant) { Junk.room_participant }
+    let(:user) { Junk.user }
 
     subject do
-      available_moves(participant.user_uuid)
+      available_moves(user.uuid)
     end
 
     before do
-      Room.all.first.advance(room_participants: [participant])
+      Room.all.first.join(user)
+      Room.all.first.advance
     end
 
     it 'provides a list of available moves' do

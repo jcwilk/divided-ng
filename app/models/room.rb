@@ -13,21 +13,26 @@ class Room < MemoryModel
     end
   end
 
-  delegate :current_round, :advance, to: :round_sequence
+  delegate :current_round, to: :round_sequence
+
+  attr_reader :participants
 
   def initialize
     super
     self.round_sequence = RoundSequence.new
+    self.floor = Floor.new
+    @participants = []
+  end
 
-    # TODO: Something feels off about this, we shouldn't have to
-    # manaully start it until someone joins because we want EM to
-    # be advancing it every X seconds while people are in it, but
-    # there should always be a current round. Once we integrate
-    # EM the optimal form should be clearer
-    # round_sequence.start(room_participants: [])
+  def advance
+    round_sequence.advance(room_participants: participants)
+  end
+
+  def join(user)
+    participants << RoomParticipant.new(user, floor: floor, room_uuid: uuid)
   end
 
   private
 
-  attr_accessor :round_sequence
+  attr_accessor :round_sequence, :floor
 end
