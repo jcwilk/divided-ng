@@ -1,28 +1,11 @@
 class Room < MemoryModel
-  class << self
-    def all
-      @all||= [new]
-    end
+  property :floor, required: true, default: -> { Floor.new }
+  property :round_sequence, required: true, default: -> { RoundSequence.new }
+  property :participants, required: true, default: -> { [] }
 
-    def by_uuid(uuid)
-      all.find {|r| r.uuid == uuid }
-    end
-
-    def reset
-      @all = [new]
-    end
-  end
+  private :floor, :floor=, :round_sequence, :round_sequence=
 
   delegate :current_round, to: :round_sequence
-
-  attr_reader :participants
-
-  def initialize
-    super
-    self.round_sequence = RoundSequence.new
-    self.floor = Floor.new
-    @participants = []
-  end
 
   def advance
     round_sequence.advance(room_participants: participants)
@@ -31,8 +14,4 @@ class Room < MemoryModel
   def join(user)
     participants << RoomParticipant.new(user, floor: floor, room_uuid: uuid)
   end
-
-  private
-
-  attr_accessor :round_sequence, :floor
 end

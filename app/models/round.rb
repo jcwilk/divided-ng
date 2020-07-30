@@ -1,5 +1,6 @@
 class Round < MemoryModel
-  attr_reader :participants
+  property :participants, required: true
+  private :participants=
 
   def self.start
     new(
@@ -11,11 +12,6 @@ class Round < MemoryModel
     raise "participants which haven't been finalized passed into a new round!" if !participants.all?(&:finalized?)
 
     super
-    @participants = participants
-  end
-
-  def join(participant)
-    @participants << participant
   end
 
   def advance(room_participants:, move_selections: [])
@@ -27,7 +23,9 @@ class Round < MemoryModel
     )
   end
 
+  # TODO: make these hash lookups
   def participant_by_user_uuid(user_uuid)
+    #RoundParticipant.by_uuid(user)
     participants.find { |p| p.user_uuid == user_uuid } or raise "missing uuid"
   end
 

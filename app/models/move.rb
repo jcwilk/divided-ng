@@ -1,15 +1,10 @@
-class Move < Hashie::Dash
+class Move < MemoryModel
   IDLE_ACTION = "wait"
 
-  property :uuid
   property :x, required: true
   property :y, required: true
   property :action, required: true
-
-  def initialize(**args)
-    super
-    self.uuid = SecureRandom.uuid
-  end
+  private :x=, :y=, :action=
 
   def coord
     Coord.new(x, y)

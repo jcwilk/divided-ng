@@ -3,10 +3,5 @@
 # It is only referenced by RoomParticipant
 # It holds a credential mechanism based on a secret key stored in a cookie
 
-class User
-  attr_reader :uuid
-
-  def initialize
-    @uuid = SecureRandom.uuid
-  end
+class User < MemoryModel
 end

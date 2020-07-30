@@ -6,14 +6,14 @@
 # It holds the moves available to reach the next round
 
 class RoundParticipant < MemoryModel
-  attr_reader :move, :room_participant, :moves
+  property :move, required: true
+  property :room_participant, required: true
 
   delegate :user_uuid, :floor, to: :room_participant
   delegate :x, :y, :coord, to: :move
 
-  def initialize(room_participant, move:)
-    @room_participant = room_participant
-    @move = move
+  def initialize(room_participant, **args)
+    super(**args, room_participant: room_participant)
   end
 
   def moves
