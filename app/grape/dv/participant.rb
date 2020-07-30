@@ -10,14 +10,14 @@ module DV
               route_param :participant_id do
                 desc 'Get one participant.'
                 params do
+                  # TODO: this isn't even a param... how is this working?
                   requires :id, type: String, desc: 'Player uuid.'
                 end
 
                 get do
-                  # TODO: Update this to the new system
-                  # we might need MemoryModel pooling now to find by id
-                  # or it could represent the full path in the url
-                  # /rooms/:room_id/rounds/:round_id/participants/:participant_id
+                  # Possible alternative - implement pooling for models and
+                  # pull them up directly by uuid like with Room. kind of
+                  # tempting tbh...
 
                   room = Room.by_uuid(params[:room_id])
                   round = room&.round_by_uuid(params[:round_id])
