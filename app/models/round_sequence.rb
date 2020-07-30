@@ -6,27 +6,27 @@ class RoundSequence < MemoryModel
   def initialize
     super
 
-    self.rounds = [Round.start]
+    self.round_uuids = [Round.start.uuid]
 
     reset_move_selections
   end
 
   def current_round
-    rounds.last
+    Round.by_uuid(round_uuids.last)
   end
 
   def advance(room_participants:)
-    rounds << current_round.advance(
+    round_uuids << current_round.advance(
       room_participants: room_participants,
       move_selections: move_selections
-    )
+    ).uuid
 
     reset_move_selections
   end
 
   private
 
-  attr_accessor :move_selections, :rounds
+  attr_accessor :move_selections, :round_uuids
 
   def reset_move_selections
     self.move_selections = []

@@ -54,10 +54,7 @@ RSpec.configure do |config|
   config.include DebugHelper
 
   config.before(:each) do
-    Room.reset
-    #Round.reset
-    #Player.reset
-    #Timecop.return
+    allow(MemoryModel).to receive(:uuid_store).and_return({})
   end
 
 # The settings below are suggested to provide a good initial experience

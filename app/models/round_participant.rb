@@ -17,19 +17,31 @@ class RoundParticipant < MemoryModel
   end
 
   def moves
-    raise "moves not yet assigned!" if @moves.nil?
+    raise "moves not yet assigned!" if !finalized?
 
-    @moves
+    moves_relation.all
+  end
+
+  def move_by_uuid(uuid)
+    moves_relation.by_uuid(uuid)
+  end
+
+  def move_by_action(action)
+    moves_relation.by(:action, action)
   end
 
   def moves=(moves)
-    raise "moves assigned when moves already exist!" if @moves
+    raise "moves assigned when moves already exist!" if finalized?
     raise "empty moves assigned!" if moves.nil?
 
-    @moves = moves
+    @moves_relation = HasMany.new(Move, members: moves, indices: [:action])
   end
 
   def finalized?
-    !!@moves
+    !!moves_relation
   end
+
+  private
+
+  attr_reader :moves_relation
 end

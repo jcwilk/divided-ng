@@ -14,7 +14,8 @@ module DV
                   params do
                     requires :id, type: String, desc: 'Participant uuid.'
                   end
-                  get '/participant/:id/moves' do
+
+                  get do
                     player = ::Player.alive_by_uuid(params[:id])
 
                     if player

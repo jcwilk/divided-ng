@@ -1,5 +1,5 @@
 class Round < MemoryModel
-  property :participants, required: true
+  attr_accessor :participants
   private :participants=
 
   def self.start
@@ -11,7 +11,9 @@ class Round < MemoryModel
   def initialize(participants:)
     raise "participants which haven't been finalized passed into a new round!" if !participants.all?(&:finalized?)
 
-    super
+    self.participants_relation = HasMany.new(RoundParticipant, members: participants, indices: [:user_uuid])
+
+    super()
   end
 
   def advance(room_participants:, move_selections: [])
@@ -23,10 +25,12 @@ class Round < MemoryModel
     )
   end
 
-  # TODO: make these hash lookups
+  def participants
+    participants_relation.all
+  end
+
   def participant_by_user_uuid(user_uuid)
-    #RoundParticipant.by_uuid(user)
-    participants.find { |p| p.user_uuid == user_uuid } or raise "missing uuid"
+    participants_relation.by(:user_uuid, user_uuid)
   end
 
   def moves_by_user_uuid(user_uuid)
@@ -35,9 +39,7 @@ class Round < MemoryModel
 
   private
 
-  def participating_uuids
-    participants.map(&:user_uuid)
-  end
+  attr_accessor :participants_relation
 
   def next_participants(room_participants:, move_selections:)
     next_participants = continuing_participants(room_participants: room_participants, move_selections: move_selections)
@@ -52,20 +54,15 @@ class Round < MemoryModel
   end
 
   def continuing_participants(room_participants:, move_selections:)
-    room_participants.select { |p| participating_uuids.include?(p.user_uuid) }.map do |room_participant|
+    room_participants.select { |p| participating_user_uuid?(p.user_uuid) }.map do |room_participant|
       move_selection = move_selections.find { |ms| ms.user_uuid == room_participant.user_uuid }
-      old_round_participant = participants.find { |p| p.user_uuid == room_participant.user_uuid }
-      selected_move = old_round_participant.moves.find do |move|
-        if move_selection
-          move.uuid == move_selection.move_uuid
-        else
-          move.action == Move::IDLE_ACTION
-        end
-      end
+      old_round_participant = participant_by_user_uuid(room_participant.user_uuid)
 
-      if selected_move.nil?
-        raise "failed to find selected move! #{move_selection ? "did have selection" : "did not have selection"}"
-      end
+      selected_move = if move_selection
+          old_round_participant.move_by_uuid(move_selection.move_uuid)
+        else
+          old_round_participant.move_by_action(Move::IDLE_ACTION)
+        end
 
       RoundParticipant.new(
         room_participant,
@@ -75,11 +72,15 @@ class Round < MemoryModel
   end
 
   def joining_participants(room_participants:)
-    room_participants.reject { |p| participating_uuids.include?(p.user_uuid) }.map do |room_participant|
+    room_participants.reject { |p| participating_user_uuid?(p.user_uuid) }.map do |room_participant|
       RoundParticipant.new(
         room_participant,
         move: MoveGenerator::Join.call
       )
     end
+  end
+
+  def participating_user_uuid?(user_uuid)
+    participants_relation.has?(:user_uuid, user_uuid)
   end
 end
