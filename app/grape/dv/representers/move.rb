@@ -8,7 +8,7 @@ module DV
       property :action
 
       link :self do |opts|
-        build_url(opts,"/dv/round/#{round_id}/participant/#{player_uuid}/move/#{id}")
+        build_url(opts,"/dv/moves/#{uuid}")
       end
     end
   end

@@ -2,36 +2,29 @@ module DV
   class Join < Grape::API
     format :json
 
-    namespace :join do
-      desc 'Join the room.' #TODO: currently not specific to a room
+    namespace :rooms do
+      route_param :room_uuid do
+        namespace :join do
+          desc 'Join the room.'
+          params do
+            requires :room_uuid, type: String, desc: 'Room uuid'
+            requires :user_uuid, type: String, desc: "User uuid"
+          end
 
-      #NB: I dislike that this POST gets its own resource.
-      # Ideally it would be a POST on an existing resource that
-      # represented the participants for the room. Currently there
-      # is only a participants resource for a specific round, and
-      # making the join POST be specific to a round doesn't seem
-      # appropriate since you wouldn't really want join links to
-      # go stale as the round advances... Nor would you want to
-      # imply it was possible to join the participants of previous
-      # rounds... Nor (thor?) is it even really appropriate since
-      # it's actually the next round that you'll be joining
+          post do
+            if !::Room.has_uuid?(params[:room_uuid])
+              error! "Missing room!", 404
+            end
 
-      # Possibly if there were participants of the current_round
-      # and not just the round it referred to? Perhaps for a later
-      # refactoring if the opportunity presents itself.
-      post do
-        uuid = headers['uuid'] || headers['Uuid']
-        round = ::Round.current_round
-        player = Player.alive_by_uuid(uuid)
+            if !::User.has_uuid?(params[:user_uuid])
+              error! "Unknown user!", 404
+            end
 
-        if round.nil?
-          fail 'Missing round!'
-        elsif player.nil?
-          error! 'Unknown uuid!', 404
-        elsif !round.join(player)
-          error! 'Player unable to join!', 400
-        else
-          present player, with: DV::Representers::Participant
+            user = ::User.by_uuid(params[:user_uuid])
+            participant = ::Room.by_uuid(params[:room_uuid]).join(user)
+
+            present participant, with: DV::Representers::RoomParticipant
+          end
         end
       end
     end

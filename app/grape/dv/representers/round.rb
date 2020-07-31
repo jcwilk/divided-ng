@@ -9,7 +9,7 @@ module DV
         build_url(opts,"/dv/round/#{uuid}")
       end
 
-      collection :participants, extend: DV::Representers::Participant, as: :participants, embedded: true
+      collection :participants, extend: DV::Representers::RoundParticipant, as: :participants, embedded: true
     end
   end
 end

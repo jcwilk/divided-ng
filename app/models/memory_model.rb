@@ -54,8 +54,6 @@ class MemoryModel < Hashie::Dash
   end
 
   class << self
-    # TODO: Add a has_many manager
-
     def all
       uuid_store.values
     end
@@ -80,13 +78,13 @@ class MemoryModel < Hashie::Dash
 
     private
 
-    # All models share the same uuid store
     def uuid_store
-      if self.class == MemoryModel
-        @uuid_store ||= {}
-      else
-        MemoryModel.send(:uuid_store)
-      end
+      MemoryModel.send(:global_uuid_store)[self] ||= {}
+    end
+
+    # All models share the same uuid store
+    def global_uuid_store
+      @global_uuid_store ||= {}
     end
   end
 
@@ -95,5 +93,9 @@ class MemoryModel < Hashie::Dash
 
   def initialize(**args)
     super(**args, uuid: SecureRandom.uuid)
+  end
+
+  def to_s(*)
+    super.gsub /^{/, "{#{self.class} "
   end
 end

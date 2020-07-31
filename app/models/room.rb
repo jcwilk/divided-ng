@@ -12,6 +12,8 @@ class Room < MemoryModel
   end
 
   def join(user)
-    participants << RoomParticipant.new(user, floor: floor, room_uuid: uuid)
+    RoomParticipant.new(user, floor: floor, room_uuid: uuid).tap do |participant|
+      participants << participant
+    end
   end
 end

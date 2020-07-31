@@ -85,24 +85,23 @@ describe 'divided hypermedia' do
   end
 
   context 'joining a room' do
-    let(:player_uuid) { 'puuid' }
-
-    #em_around
+    let!(:room) { Junk.room }
+    let(:user_uuid) { 'bogus uuid' }
 
     def join_room
-      post first_room.dv_join.url, nil, {'uuid' => player_uuid}
+      # TODO: This doesn't error when it returns a 4xx!
+      post first_room.dv_join.url, params: {'user_uuid' => user_uuid}
     end
 
-    context 'when the player exists' do
-      before do
-        Player.new_active(player_uuid)
-      end
+    context 'when the user exists' do
+      let(:user_uuid) { Junk.user.uuid }
 
-      it 'adds the player to the room of the uuid in the header' do
+      it 'adds the player to the room of the uuid in the params' do
         join_room
-        finish_after_round do
-          expect(current_round.participants.map(&:uuid)).to eql([player_uuid])
-        end
+
+        Room.all.first.advance # TODO: figure out proper way to do this
+
+        expect(current_round.participants.map(&:user_uuid)).to eql([user_uuid])
       end
     end
 

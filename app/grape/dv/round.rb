@@ -3,18 +3,17 @@ module DV
     format :json
 
     namespace :round do
-      route_param :index do
+      route_param :uuid do
         desc 'Get a round.'
         params do
-          requires :index, type: Integer, desc: 'Round index.'
+          requires :uuid, type: String, desc: 'Round uuid'
         end
 
         get do
-          round = ::Round.by_index(params[:index])
-          if round.nil?
-            error! 'Round not found!', 404
+          if ::Round.has_uuid?(params[:uuid])
+            present ::Round.by_uuid(params[:uuid]), with: DV::Representers::Round
           else
-            present round, with: DV::Representers::Round
+            error! 'Round not found!', 404
           end
         end
       end

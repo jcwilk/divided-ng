@@ -54,7 +54,7 @@ RSpec.configure do |config|
   config.include DebugHelper
 
   config.before(:each) do
-    allow(MemoryModel).to receive(:uuid_store).and_return({})
+    allow(MemoryModel).to receive(:global_uuid_store).and_return({})
   end
 
 # The settings below are suggested to provide a good initial experience

@@ -14,7 +14,7 @@ module DV
       end
 
       link 'dv:join' do |opts|
-        build_url(opts,"/dv/join") #TODO: room specific
+        build_url(opts,"/dv/rooms/#{uuid}/join")
       end
     end
   end

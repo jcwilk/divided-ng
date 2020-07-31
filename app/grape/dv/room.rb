@@ -3,18 +3,17 @@ module DV
     format :json
 
     namespace :room do
-      route_param :id do
+      route_param :uuid do
         desc 'Get one room.'
         params do
-          requires :id, type: String, desc: 'Player uuid.'
+          requires :uuid, type: String, desc: 'Room uuid'
         end
 
         get do
-          room = ::Room.by_uuid(params[:id])
-          if room.nil?
-            error! 'Room not found!', 404
+          if ::Room.has_uuid?(params[:uuid])
+            present ::Room.by_uuid(params[:uuid]), with: DV::Representers::Room
           else
-            present room, with: DV::Representers::Room
+            error! 'Room not found!', 404
           end
         end
       end
