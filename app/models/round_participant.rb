@@ -9,7 +9,7 @@ class RoundParticipant < MemoryModel
   property :move, required: true
   property :room_participant, required: true
 
-  delegate :user_uuid, :floor, to: :room_participant
+  delegate :user_uuid, :floor, :room, to: :room_participant
   delegate :x, :y, :coord, to: :move
 
   def initialize(room_participant, **args)
@@ -17,7 +17,7 @@ class RoundParticipant < MemoryModel
   end
 
   def moves
-    raise "moves not yet assigned!" if !finalized?
+    raise "participant not yet finalized!" if !finalized?
 
     moves_relation.all
   end
@@ -31,17 +31,30 @@ class RoundParticipant < MemoryModel
   end
 
   def moves=(moves)
-    raise "moves assigned when moves already exist!" if finalized?
+    raise "moves assigned when moves already exist!" if moves_relation
     raise "empty moves assigned!" if moves.nil?
 
     @moves_relation = HasMany.new(Move, members: moves, indices: [:action])
   end
 
+  def round_uuid=(round_uuid)
+    raise "nil round uuid assigned!" if round_uuid.nil?
+    raise "round already assigned!" if self.round_uuid
+
+    @round_uuid = round_uuid
+  end
+
+  def round
+    raise "participant not yet finalized!" if !finalized?
+
+    Round.by_uuid(round_uuid)
+  end
+
   def finalized?
-    !!moves_relation
+    !!moves_relation && !!round_uuid
   end
 
   private
 
-  attr_reader :moves_relation
+  attr_reader :moves_relation, :round_uuid
 end

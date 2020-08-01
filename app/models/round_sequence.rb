@@ -24,6 +24,16 @@ class RoundSequence < MemoryModel
     reset_move_selections
   end
 
+  def add_selection(move_selection, room_participants:)
+    raise "user already made selection!" if move_selections.any? { |ms| ms.user_uuid == move_selection.user_uuid }
+
+    move_selections << move_selection
+
+    if (room_participants.map(&:user_uuid) - move_selections.map(&:user_uuid)).empty?
+      advance(room_participants: room_participants)
+    end
+  end
+
   private
 
   attr_accessor :move_selections, :round_uuids

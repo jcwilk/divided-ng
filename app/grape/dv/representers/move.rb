@@ -10,6 +10,10 @@ module DV
       link :self do |opts|
         build_url(opts,"/dv/moves/#{uuid}")
       end
+
+      link :choose do |opts|
+        build_url(opts,"/dv/moves/#{uuid}")
+      end
     end
   end
 end

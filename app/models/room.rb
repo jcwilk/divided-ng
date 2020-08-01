@@ -16,4 +16,11 @@ class Room < MemoryModel
       participants << participant
     end
   end
+
+  def choose_move(move_uuid:, user_uuid:)
+    raise "user not participating in room!" if participants.none? { |rp| rp.user_uuid == user_uuid }
+
+    move_selection = MoveSelection.new(move_uuid: move_uuid, user_uuid: user_uuid)
+    round_sequence.add_selection(move_selection, room_participants: participants)
+  end
 end

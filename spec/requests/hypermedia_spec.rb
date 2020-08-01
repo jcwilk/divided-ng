@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 describe 'divided hypermedia' do
@@ -26,7 +28,7 @@ describe 'divided hypermedia' do
   def available_moves(uuid)
     p = get_participant_by_uuid(uuid)
     fail "Participant not found!" if p.nil?
-    p.dv_moves.to_a
+    p.moves.to_a
   end
 
   def get_participant_by_uuid(uuid)
@@ -58,6 +60,7 @@ describe 'divided hypermedia' do
   end
 
   context 'retrieving available moves for a player' do
+    let!(:room) { Junk.room }
     let(:user) { Junk.user }
 
     subject do
@@ -75,7 +78,7 @@ describe 'divided hypermedia' do
 
     context 'and submitting one of them' do
       def submit_move
-        available_moves(@player.uuid).first.post
+        post available_moves(user.uuid).first.choose.href, params: {user_uuid: user.uuid}
       end
 
       it 'advances the round' do

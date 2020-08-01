@@ -50,4 +50,46 @@ describe RoundSequence do
       expect(subject.current_round.participants.map(&:user_uuid)).to include(user.uuid)
     end
   end
+
+  context "when adding a move selection" do
+    let!(:pack) { Junk.round_pack }
+    let!(:user2) { Junk.user.tap { |u| room.join(u); room.advance } }
+
+    let(:user_uuid) { pack[:user].uuid }
+    let(:move_uuid) { pack[:moves].first.uuid }
+    let(:room) { pack[:room] }
+    let(:round_sequence) { room.send(:round_sequence) }
+    let(:move_selection) { MoveSelection.new(user_uuid: user_uuid, move_uuid: move_uuid) }
+    let(:room_participants) { room.participants }
+
+    def add_selection
+      round_sequence.add_selection(move_selection, room_participants: room_participants)
+    end
+
+    it "does not raise" do
+      expect { add_selection }.not_to raise_error
+    end
+
+    context "when adding the same selection twice" do
+      it "raises the second time" do
+        add_selection
+        expect { add_selection }.to raise_error
+      end
+    end
+
+    context "when a move has been selected for every participant" do
+      it "advances the round" do
+        move2 = room.current_round.participants.find {|p| p.user_uuid == user2.uuid }.moves.first
+        move_selection2 = MoveSelection.new(user_uuid: user2.uuid, move_uuid: move2.uuid )
+        round_sequence.add_selection(move_selection2, room_participants: room_participants)
+        expect { add_selection }.to change { room.current_round }
+      end
+    end
+
+    context "when a move has been made for not all participants" do
+      it "does not advance the round" do
+        expect { add_selection }.not_to change { room.current_round }
+      end
+    end
+  end
 end

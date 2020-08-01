@@ -1,10 +1,11 @@
 class MoveGenerator
   class Attack < MoveGenerator
-    def self.call(coord)
+    def self.call(participant, coord)
       Move.new(
         x: coord.x,
         y: coord.y,
-        action: "attack"
+        action: "attack",
+        round_participant_uuid: participant.uuid
       )
     end
   end

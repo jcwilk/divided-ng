@@ -15,4 +15,8 @@ class RoomParticipant < MemoryModel
   def initialize(user, **args)
     super(**args, user: user)
   end
+
+  def room
+    Room.by_uuid(room_uuid)
+  end
 end

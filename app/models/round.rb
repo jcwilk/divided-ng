@@ -9,11 +9,13 @@ class Round < MemoryModel
   end
 
   def initialize(participants:)
+    super()
+
+    participants.each { |participant| participant.round_uuid = uuid }
+
     raise "participants which haven't been finalized passed into a new round!" if !participants.all?(&:finalized?)
 
     self.participants_relation = HasMany.new(RoundParticipant, members: participants, indices: [:user_uuid])
-
-    super()
   end
 
   def advance(room_participants:, move_selections: [])
@@ -73,9 +75,9 @@ class Round < MemoryModel
 
   def joining_participants(room_participants:)
     room_participants.reject { |p| participating_user_uuid?(p.user_uuid) }.map do |room_participant|
-      RoundParticipant.new(
+      RoundParticipant.new( # TODO: how to make a round participant and join at the same time?
         room_participant,
-        move: MoveGenerator::Join.call
+        move: MoveGenerator::Join.call()
       )
     end
   end

@@ -1,10 +1,11 @@
 class MoveGenerator
   class Wait < MoveGenerator
-    def self.call(coord)
+    def self.call(participant, coord)
       Move.new(
         x: coord.x,
         y: coord.y,
-        action: Move::IDLE_ACTION
+        action: Move::IDLE_ACTION,
+        round_participant_uuid: participant.uuid
       )
     end
   end

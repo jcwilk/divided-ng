@@ -29,4 +29,21 @@ module Junk
   def self.round_participant(room_participant = Junk.room_participant, move: Junk.move)
     RoundParticipant.new(room_participant, move: move)
   end
+
+  def self.round_pack
+    room = Junk.room
+    user = Junk.user
+    room_participant = room.join(user)
+    room.advance
+    round_participant = room.current_round.participants.first
+
+    {
+      room: room,
+      user: user,
+      room_participant: room_participant,
+      round: room.current_round,
+      round_participant: round_participant,
+      moves: round_participant.moves
+    }
+  end
 end
