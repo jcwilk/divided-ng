@@ -3,8 +3,10 @@
 # It hands them off to rounds to become RoundParticipants
 
 class RoundSequence < MemoryModel
-  def initialize
-    super
+  def initialize(room_uuid:)
+    super()
+
+    @room_uuid = room_uuid
 
     self.round_uuids = [Round.start.uuid]
 
@@ -22,6 +24,12 @@ class RoundSequence < MemoryModel
     ).uuid
 
     reset_move_selections
+
+    # TODO: build this into a MemoryModel helper
+    ActionCable.server.broadcast(
+      "/dv/rooms/#{@room_uuid}/current_round",
+      **DV::Representers::Round.new(current_round).to_hash
+    )
   end
 
   def add_selection(move_selection, room_participants:)

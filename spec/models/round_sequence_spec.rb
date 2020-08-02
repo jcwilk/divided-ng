@@ -1,6 +1,8 @@
 require "rails_helper"
 
 describe RoundSequence do
+  subject { described_class.new(room_uuid: Junk.room.uuid) }
+
   let(:user) { Junk.user }
   let(:room_participant) { Junk.room_participant(user: user) }
 
