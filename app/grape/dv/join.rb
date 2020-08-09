@@ -8,19 +8,19 @@ module DV
           desc 'Join the room.'
           params do
             requires :room_uuid, type: String, desc: 'Room uuid'
-            requires :user_uuid, type: String, desc: "User uuid"
           end
 
           post do
+            user_uuid = env["action_dispatch.cookies"].signed["user_uuid"]
+            if !::User.has_uuid?(user_uuid)
+              error! "Unknown user!", 401
+            end
+
             if !::Room.has_uuid?(params[:room_uuid])
               error! "Missing room!", 404
             end
 
-            if !::User.has_uuid?(params[:user_uuid])
-              error! "Unknown user!", 404
-            end
-
-            user = ::User.by_uuid(params[:user_uuid])
+            user = ::User.by_uuid(user_uuid)
             participant = ::Room.by_uuid(params[:room_uuid]).join(user)
 
             present participant, with: DV::Representers::RoomParticipant

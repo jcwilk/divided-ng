@@ -39,6 +39,10 @@ class Round < MemoryModel
     participant_by_user_uuid(user_uuid).moves
   end
 
+  def dv_hash
+    DV::Representers::Round.new(self).to_hash
+  end
+
   private
 
   attr_accessor :participants_relation

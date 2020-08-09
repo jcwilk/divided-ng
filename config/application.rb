@@ -19,6 +19,11 @@ require "action_cable/engine"
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)
 
+# NB: This must be explicitly loaded so it is not reloaded
+# as reloading a class clears its class-level state which
+# contains all the stored data for its children
+require_relative "../lib/memory_model"
+
 module Divided
   class Application < Rails::Application
     # Initialize configuration defaults for originally generated Rails version.

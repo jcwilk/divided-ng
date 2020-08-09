@@ -78,8 +78,17 @@ class MemoryModel < Hashie::Dash
 
     private
 
+    # The below is kind of a messy mechanism for using this parentclass
+    # as a memory store for all the state of its derived classes. All
+    # child classes will also have a `global_uuid_store` technically
+    # but only this parent class' will get used.
+
     def uuid_store
-      MemoryModel.send(:global_uuid_store)[self] ||= {}
+      # NB: models gets auto-reloaded but this superclass does not since
+      # it's in `lib`. When models get reloaded their object_id changes
+      # which means we have to store them by the "name" of the class so
+      # that their data doesn't get cleared on reload.
+      MemoryModel.send(:global_uuid_store)[self.to_s.to_sym] ||= {}
     end
 
     # All models share the same uuid store

@@ -1,5 +1,7 @@
 module DV
   class Root < Grape::API
+    use ActionDispatch::Session::CookieStore
+
     format :json
     formatter :json, Grape::Formatter::Roar
 

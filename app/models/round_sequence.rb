@@ -25,11 +25,7 @@ class RoundSequence < MemoryModel
 
     reset_move_selections
 
-    # TODO: build this into a MemoryModel helper
-    ActionCable.server.broadcast(
-      "/dv/rooms/#{@room_uuid}/current_round",
-      **DV::Representers::Round.new(current_round).to_hash
-    )
+    broadcast_current_round
   end
 
   def add_selection(move_selection, room_participants:)
@@ -48,5 +44,17 @@ class RoundSequence < MemoryModel
 
   def reset_move_selections
     self.move_selections = []
+  end
+
+  def broadcast_current_round
+    # TODO: build this into a MemoryModel helper?
+    ActionCable.server.broadcast(
+      current_round_key,
+      **current_round.dv_hash
+    )
+  end
+
+  def current_round_key
+    DVChannel.current_round_key(room_uuid: @room_uuid)
   end
 end

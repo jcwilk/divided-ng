@@ -55,6 +55,15 @@ module DV
         end.to_s+path
       end
 
+      def build_listen_uri(opts, key)
+        URI.parse(base_url(opts)).tap do |uri|
+          uri.scheme = "cable"
+          uri.path = "/cable"
+          uri.fragment = "DVChannel"
+          uri.query = {key: key}.to_query
+        end.to_s
+      end
+
       def base_url(opts)
         if opts[:env].present?
           request = Grape::Request.new(opts[:env])

@@ -18,6 +18,10 @@ class Room < MemoryModel
   def join(user)
     RoomParticipant.new(user, floor: floor, room_uuid: uuid).tap do |participant|
       participants << participant
+
+      if participants.size == 1
+        advance
+      end
     end
   end
 

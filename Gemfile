@@ -4,6 +4,7 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 ruby "2.7.1"
 
 gem "bootsnap", ">= 1.4.2", require: false
+gem "falcon"
 gem "grape"
 gem "grape-roar"
 gem "hashie"
@@ -13,7 +14,7 @@ gem "pg", ">= 0.18", "< 2.0"
 gem "rails", "~> 6.0.3", ">= 6.0.3.2"
 gem "roar"
 gem "slim-rails"
-gem "thin"
+# gem "thin"
 gem "webpacker", "~> 4.0"
 
 # Use Redis adapter to run Action Cable in production

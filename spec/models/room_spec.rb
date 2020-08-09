@@ -14,6 +14,16 @@ describe Room do
         expect(subject.current_round.participants).to be_empty
       end
     end
+
+    context "when joining" do
+      def join
+        subject.join(Junk.user)
+      end
+
+      it "advances automatically" do
+        expect { join }.to change { subject.current_round.uuid }
+      end
+    end
   end
 
   context "with a new participant" do
