@@ -23,9 +23,12 @@ window.jQuery = require("jquery")
 window.URI = require("URIjs")
 window.URITemplate = require('URIjs/src/URITemplate');
 
+
 require("vendor/hyperagent")
 Hyperagent.configure('defer', window.Q.defer);
 const Resource = Hyperagent.Resource;
+
+$(document).ready(function() { require("game") })
 
 const api = new Resource("/dv").fetch().then(function(root) {
   return root.links["dv:rooms"].fetch()

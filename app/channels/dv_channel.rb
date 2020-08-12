@@ -6,6 +6,8 @@ class DVChannel < ApplicationCable::Channel
   end
 
   def subscribed
+    # TODO: This will become more generalized as needed
+    # See commented out code below for ideas on roughly how
     if matches = params[:key].match(/\Adv_room_([^_]+)_current_round\z/)
       uuid = matches.captures.first
       stream_from params[:key]
