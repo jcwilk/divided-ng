@@ -28,7 +28,14 @@ require("vendor/hyperagent")
 Hyperagent.configure('defer', window.Q.defer);
 const Resource = Hyperagent.Resource;
 
-$(document).ready(function() { require("game") })
+window.GameAdapter = {} // temporary holding place for callbacks til I get less lazy
+
+var userUuid
+
+$(document).ready(function() {
+  userUuid = $('#frame').attr("data-user-uuid")
+  require("game")
+})
 
 const api = new Resource("/dv").fetch().then(function(root) {
   return root.links["dv:rooms"].fetch()
@@ -58,7 +65,43 @@ const api = new Resource("/dv").fetch().then(function(root) {
     received(data) {
       console.log("Received current round data!")
       console.log(data)
-      $.post(joinLink)
+      var res = new Hyperagent.Resource()
+      res._load(data)
+
+      var participants = res.embedded.participants
+      var participantPositions = {participants: []}
+
+      var seenMe = false
+
+      for(var i = 0; i < participants.length; i++) {
+        if(participants[i].props["user_uuid"] == userUuid) {
+          // It's us!
+          seenMe = true
+          participantPositions.moves = []
+          var moves = participants[i].embedded.moves
+          for(var j = 0; j < moves.length; j++) {
+            var move = moves[j]
+            participantPositions.moves.push({
+              x: move.props.x,
+              y: move.props.y,
+              onClick: (function(){
+                var move = moves[j]
+                return function(){
+                  $.post(move.links.self.href)
+                }
+              })()
+            })
+          }
+        }
+
+        participantPositions.participants.push({
+          x: participants[i].embedded.move.props.x,
+          y: participants[i].embedded.move.props.y
+        })
+      }
+      GameAdapter.onNewRound(participantPositions)
+
+      if(!seenMe) $.post(joinLink)
     }
   });
 })

@@ -70,7 +70,7 @@ module DV
           request.base_url
         else
           puts "Warning! Unable to get hostname"
-          "http://missing.example.com"
+          "http://localhost:3000"
         end
       end
     end

@@ -8,16 +8,18 @@ module DV
         params do
           # TODO: only permit the owning user to submit
           requires :uuid, type: String, desc: 'Move uuid'
-          requires :user_uuid, type: String, desc: "User uuid"
         end
 
         post do
+          user_uuid = env["action_dispatch.cookies"].signed["user_uuid"]
+
           if !::Move.has_uuid?(params[:uuid])
             error! "Move not found!"
           end
 
           move = ::Move.by_uuid(params[:uuid])
-          MoveChooser.call(move, params[:user_uuid])
+          MoveChooser.call(move, user_uuid)
+
           present move, with: DV::Representers::Move
         end
 

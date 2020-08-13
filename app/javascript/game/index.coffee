@@ -1,3 +1,5 @@
+MARGIN_PIXELS = 5;
+
 window.PIXI = require('pixi.js')
 
 window.app = new PIXI.Application({
@@ -9,17 +11,6 @@ window.app = new PIXI.Application({
 PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
 
 document.querySelector('#frame').appendChild(app.view)
-
-# Lets create a red square, this isn't
-# necessary only to show something that can be position
-# to the bottom-right corner
-# rect = new PIXI.Graphics()
-#   .beginFill(0xff0000)
-#   .drawRect(-100, -100, 100, 100)
-
-# # Add it to the stage
-# app.stage.addChild(rect)
-
 
 
 import spaceImage from '../images/space_128.gif'
@@ -75,12 +66,43 @@ for col in [0..9]
     tile.y = row * 8
     container.addChild(tile)
 
-container.x = 5
-container.y = 5
+container.x = MARGIN_PIXELS
+container.y = MARGIN_PIXELS
 
 
 
+import mobImage from '../images/mob_8.gif'
+mobTexture = PIXI.Texture.from(mobImage)
 
+import floorSelectionImage from '../images/floor_selection_8.gif'
+floorSelectionTexture = PIXI.Texture.from(floorSelectionImage)
+
+mobContainer = new PIXI.Container()
+
+app.stage.addChild(mobContainer)
+
+window.GameAdapter.onNewRound = (data) ->
+  mobContainer.destroy(children: true)
+  mobContainer = new PIXI.Container()
+  app.stage.addChild(mobContainer)
+  # for child in mobContainer.children
+  #   child.destroy()
+
+  for participant in data.participants
+    mob = new PIXI.Sprite(mobTexture)
+    mob.x = participant.x * 8 + MARGIN_PIXELS
+    mob.y = participant.y * 8 + MARGIN_PIXELS
+    mobContainer.addChild(mob)
+
+  if data.moves
+    for move in data.moves
+      m = new PIXI.Sprite(floorSelectionTexture)
+      m.x = move.x * 8 + MARGIN_PIXELS
+      m.y = move.y * 8 + MARGIN_PIXELS
+      m.interactive = true
+      m.buttonMode = true
+      m.on('pointerdown', move.onClick)
+      mobContainer.addChild(m)
 
 # Resize function window
 resize = () ->
@@ -92,7 +114,7 @@ resize = () ->
 
   # Scale the renderer to fit 128x128 plus extra on the bottom or right
   narrowest = Math.min(parent.clientWidth, parent.clientHeight)
-  app.stage.scale.set(narrowest / 90)
+  app.stage.scale.set(narrowest / (80 + MARGIN_PIXELS * 2))
 
 # Listen for window resize events
 window.addEventListener('resize', resize)
