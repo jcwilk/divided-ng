@@ -75,8 +75,8 @@ for col in [0..9]
     tile.y = row * 8
     container.addChild(tile)
 
-container.x = 24
-container.y = 24
+container.x = 5
+container.y = 5
 
 
 
@@ -92,7 +92,7 @@ resize = () ->
 
   # Scale the renderer to fit 128x128 plus extra on the bottom or right
   narrowest = Math.min(parent.clientWidth, parent.clientHeight)
-  app.stage.scale.set(narrowest / 128)
+  app.stage.scale.set(narrowest / 90)
 
 # Listen for window resize events
 window.addEventListener('resize', resize)
