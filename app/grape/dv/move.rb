@@ -13,6 +13,10 @@ module DV
         post do
           user_uuid = env["action_dispatch.cookies"].signed["user_uuid"]
 
+          if user_uuid.nil?
+            error! "user_uuid not set in cookie!"
+          end
+
           if !::Move.has_uuid?(params[:uuid])
             error! "Move not found!"
           end

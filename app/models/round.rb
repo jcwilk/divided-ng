@@ -40,7 +40,7 @@ class Round < MemoryModel
   end
 
   def dv_hash
-    DV::Representers::Round.new(self).to_hash
+    DV::Representers::Round.render_hash(self)
   end
 
   private

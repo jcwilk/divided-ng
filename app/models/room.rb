@@ -16,12 +16,12 @@ class Room < MemoryModel
   end
 
   def join(user)
+    raise "user already participating!" if participants.any? { |p| p.user_uuid == user.uuid }
+
     RoomParticipant.new(user, floor: floor, room_uuid: uuid).tap do |participant|
       participants << participant
 
-      if participants.size == 1
-        advance
-      end
+      round_sequence.add_joiner(participant, room_participants: participants)
     end
   end
 

@@ -11,8 +11,10 @@ module DV
           # calls create_representation_with representable-3.0.4/lib/representable.rb:45
           # this used to be `env:` but I changed it to `user_options:` to conform with representable
           new(obj).to_json(user_options: {
-            "rack.url_scheme" => 'http',
-            "HTTP_HOST" => Divided::CANONICAL_HOST
+            env: {
+              "rack.url_scheme" => 'http',
+              "HTTP_HOST" => Divided::CANONICAL_HOST
+            }
           })
         end
 

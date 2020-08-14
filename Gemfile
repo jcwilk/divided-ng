@@ -26,6 +26,7 @@ gem "webpacker", "~> 4.0"
 # gem "image_processing", "~> 1.2"
 
 group :development, :test do
+  gem 'dotenv-rails'
   gem "pry-byebug"
   gem "rspec-rails"
 end

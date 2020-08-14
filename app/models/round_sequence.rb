@@ -10,7 +10,7 @@ class RoundSequence < MemoryModel
 
     self.round_uuids = [Round.start.uuid]
 
-    reset_move_selections
+    reset_buffers
   end
 
   def current_round
@@ -23,9 +23,17 @@ class RoundSequence < MemoryModel
       move_selections: move_selections
     ).uuid
 
-    reset_move_selections
+    reset_buffers
 
     broadcast_current_round
+  end
+
+  def add_joiner(new_room_participant, room_participants:)
+    raise "already joined!" if joiners.any? { |p| p.user_uuid == user.uuid }
+
+    joiners << new_room_participant
+
+    advance_if_complete(room_participants)
   end
 
   def add_selection(move_selection, room_participants:)
@@ -33,17 +41,24 @@ class RoundSequence < MemoryModel
 
     move_selections << move_selection
 
-    if (room_participants.map(&:user_uuid) - move_selections.map(&:user_uuid)).empty?
-      advance(room_participants: room_participants)
-    end
+    advance_if_complete(room_participants)
   end
 
   private
 
-  attr_accessor :move_selections, :round_uuids
+  attr_accessor :joiners, :move_selections, :round_uuids
 
-  def reset_move_selections
+  def reset_buffers
     self.move_selections = []
+    self.joiners = []
+  end
+
+  def advance_if_complete(room_participants)
+    advance(room_participants: room_participants) if full_round?(room_participants)
+  end
+
+  def full_round?(room_participants)
+    (room_participants.map(&:user_uuid) - move_selections.map(&:user_uuid) - joiners.map(&:user_uuid)).empty?
   end
 
   def broadcast_current_round
