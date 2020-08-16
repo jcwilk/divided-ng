@@ -16,7 +16,9 @@ class MemoryModel < Hashie::Dash
     end
 
     def has?(key, val)
-      uuid = indices[key]&.public_send(:[],val)
+      raise "index #{key.inspect} not set!" if !indices.key?(key)
+
+      uuid = indices[key][val]
 
       uuid ? klass.has_uuid?(uuid) : false
     end

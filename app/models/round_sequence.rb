@@ -18,9 +18,10 @@ class RoundSequence < MemoryModel
   end
 
   def advance(room_participants:)
-    round_uuids << current_round.advance(
+    round_uuids << RoundResolver.call(
       room_participants: room_participants,
-      move_selections: move_selections
+      move_selections: move_selections,
+      round: current_round
     ).uuid
 
     reset_buffers

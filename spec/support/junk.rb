@@ -19,7 +19,10 @@ module Junk
   end
 
   def self.round(room_participant: Junk.room_participant)
-    Round.start.advance(room_participants: [room_participant])
+    RoundResolver.call(
+      room_participants: [room_participant],
+      round: Round.start
+    )
   end
 
   def self.move

@@ -1,7 +1,5 @@
 class MovesGenerator
-  def self.call(*args)
-    new(*args).call
-  end
+  include Callable
 
   attr_accessor :player, :others
 
