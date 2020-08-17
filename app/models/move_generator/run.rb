@@ -5,7 +5,7 @@ class MoveGenerator
         x: coord.x,
         y: coord.y,
         action: "run",
-        round_participant_uuid: participant.uuid
+        allow_round_participant_uuid: participant.uuid
       )
     end
   end

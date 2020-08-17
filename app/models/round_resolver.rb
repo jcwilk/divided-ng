@@ -1,4 +1,51 @@
 class RoundResolver
+  class Movement
+    attr_reader :room_participant, :coord
+
+    delegate :uuid, :action, to: :selected_move
+    delegate :x, :y, to: :coord
+
+    def initialize(start_coord:, selected_move:, room_participant:)
+      self.start_coord = start_coord
+      self.selected_move = selected_move
+      self.room_participant_uuid = room_participant.uuid
+      self.coord = selected_move.coord
+
+      generate_path
+    end
+
+    def backup
+      if coord.x < start_coord.x
+        self.coord = Coord.new(coord.x+1,coord.y)
+      elsif coord.x > start_coord.x
+        self.coord = Coord.new(coord.x-1,coord.y)
+      end
+
+      if coord.y < start_coord.y
+        self.coord = Coord.new(coord.x,coord.y+1)
+      elsif coord.y > start_coord.y
+        self.coord = Coord.new(coord.x,coord.y-1)
+      end
+    end
+
+    def move_uuid
+      selected_move.uuid
+    end
+
+    def room_participant
+      RoomParticipant.by_uuid(room_participant_uuid)
+    end
+
+    private
+
+    attr_writer :coord
+    attr_accessor :selected_move, :path, :room_participant_uuid, :start_coord
+
+    def generate_path
+      self.path = [coord]
+    end
+  end
+
   include Callable
 
   def initialize(room_participants:, move_selections: [], round:)
@@ -26,8 +73,16 @@ class RoundResolver
   delegate :participant_by_user_uuid, :participating_user_uuid?, to: :round, private: true
 
   def generate_participants
-    next_participants = continuing_participants
-    next_participants += joining_participants
+    movements = continuing_participants + joining_participants
+
+    resolve_conflicts(movements)
+
+    next_participants = movements.map do |movement|
+      RoundParticipant.new(
+        movement.room_participant,
+        move: movement
+      )
+    end
 
     next_participants.each do |participant|
       participant.moves = MovesGenerator.call(
@@ -48,19 +103,39 @@ class RoundResolver
           old_round_participant.move_by_action(Move::IDLE_ACTION)
         end
 
-      RoundParticipant.new(
-        room_participant,
-        move: selected_move
+      Movement.new(
+        start_coord: old_round_participant.coord,
+        selected_move: selected_move,
+        room_participant: room_participant
       )
     end
   end
 
   def joining_participants
     room_participants.reject { |p| participating_user_uuid?(p.user_uuid) }.map do |room_participant|
-      RoundParticipant.new( # TODO: how to make a round participant and join at the same time?
-        room_participant,
-        move: MoveGenerator::Join.call()
+      join = MoveGenerator::Join.call
+      Movement.new(
+        start_coord: join.coord,
+        selected_move: join,
+        room_participant: room_participant
       )
+    end
+  end
+
+  def resolve_conflicts(movements)
+    remaining_loops = 100
+    loop do
+      remaining_loops -= 1
+      if remaining_loops <= 0
+        raise "too many loops!"
+      end
+
+
+      conflicting = movements.select { |m1| movements.any? { |m2| m1.coord == m2.coord && m1.move_uuid != m2.move_uuid } }
+
+      break if conflicting.empty?
+
+      conflicting.each(&:backup)
     end
   end
 end

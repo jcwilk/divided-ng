@@ -47,6 +47,40 @@ module Junk
       round: room.current_round,
       round_participant: round_participant,
       moves: round_participant.moves
-    }
+    }.extend(Hashie::Extensions::MethodReader)
+  end
+
+  def self.round_pack_with_two_nearby_players
+    room = Junk.room
+    user1 = Junk.user
+    user2 = Junk.user
+
+    # round 1
+    room_participant1 = room.join(user1)
+
+    # round 2
+    room_participant2 = room.join(user2)
+    user1_moves = room.current_round.participants.first.moves
+    move = user1_moves.find { |move| move.x == 3 && move.y == 3 }
+    room.choose_move(move_uuid: move.uuid, user_uuid: user1.uuid)
+
+
+    # round 3
+    round = room.current_round
+    round_participant1 = room.current_round.participants.find { |p| p.user_uuid == user1.uuid }
+    round_participant2 = (room.current_round.participants - [round_participant1]).first
+
+    {
+      room: room,
+      user1: user1,
+      user2: user2,
+      room_participant1: room_participant1,
+      room_participant2: room_participant2,
+      round: round,
+      round_participant1: round_participant1,
+      round_participant2: round_participant2,
+      moves1: round_participant1.moves,
+      moves2: round_participant2.moves,
+    }.extend(Hashie::Extensions::MethodReader)
   end
 end

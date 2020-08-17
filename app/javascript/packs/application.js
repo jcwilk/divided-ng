@@ -101,7 +101,8 @@ const api = new Resource("/dv").fetch().then(function(root) {
       }
       GameAdapter.onNewRound(participantPositions)
 
-      if(!seenMe) $.post(joinLink)
+      //temporarily..? moved to the channel server
+      //if(!seenMe) $.post(joinLink)
     }
   });
 })

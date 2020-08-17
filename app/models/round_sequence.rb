@@ -45,6 +45,10 @@ class RoundSequence < MemoryModel
     advance_if_complete(room_participants)
   end
 
+  def advance_if_complete(room_participants)
+    advance(room_participants: room_participants) if full_round?(room_participants)
+  end
+
   private
 
   attr_accessor :joiners, :move_selections, :round_uuids
@@ -52,10 +56,6 @@ class RoundSequence < MemoryModel
   def reset_buffers
     self.move_selections = []
     self.joiners = []
-  end
-
-  def advance_if_complete(room_participants)
-    advance(room_participants: room_participants) if full_round?(room_participants)
   end
 
   def full_round?(room_participants)

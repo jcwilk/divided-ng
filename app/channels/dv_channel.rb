@@ -10,11 +10,30 @@ class DVChannel < ApplicationCable::Channel
     # See commented out code below for ideas on roughly how
     if matches = params[:key].match(/\Adv_room_([^_]+)_current_round\z/)
       uuid = matches.captures.first
+      room = Room.by_uuid(uuid)
+
+      room.join(current_user)
       stream_from params[:key]
       transmit Room.by_uuid(uuid).current_round.dv_hash
     else
       reject
     end
+  end
+
+  def unsubscribed
+    room.disconnected(current_user)
+  end
+
+  private
+
+  def valid_key?
+    params[:key].match(/\Adv_room_([^_]+)_current_round\z/)
+  end
+
+  def room
+    matches = params[:key].match(/\Adv_room_([^_]+)_current_round\z/)
+    uuid = matches.captures.first
+    room = Room.by_uuid(uuid)
   end
 
   # def subscribed

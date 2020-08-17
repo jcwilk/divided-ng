@@ -25,6 +25,12 @@ class Room < MemoryModel
     end
   end
 
+  def disconnected(user)
+    participants.delete_if { |participant| participant.user_uuid == user.uuid }
+
+    round_sequence.advance_if_complete(participants)
+  end
+
   def choose_move(move_uuid:, user_uuid:)
     raise "user not participating in room!" if participants.none? { |rp| rp.user_uuid == user_uuid }
 

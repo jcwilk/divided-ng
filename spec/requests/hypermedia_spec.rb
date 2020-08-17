@@ -91,7 +91,7 @@ describe 'divided hypermedia' do
 
     context 'and submitting one of them' do
       def submit_move
-        post available_moves(user.uuid).first.choose.href
+        post available_moves(user.uuid).last.choose.href
       end
 
       it 'advances the round' do

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class MemoryModel < Hashie::Dash
   class HasMany
     attr_reader :klass, :uuids, :indices
