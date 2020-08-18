@@ -30,7 +30,7 @@ class RoundSequence < MemoryModel
   end
 
   def add_joiner(new_room_participant, room_participants:)
-    raise "already joined!" if joiners.any? { |p| p.user_uuid == user.uuid }
+    raise "already joined!" if joiners.any? { |p| p.user_uuid == new_room_participant.uuid }
 
     joiners << new_room_participant
 
