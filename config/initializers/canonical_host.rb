@@ -7,6 +7,6 @@ module Divided
     else
       #TODO: figure out why this needs a port
       # it defaults to 0 otherwise for some reason
-      'divided.herokuapp.com:80'
+      'divided.herokuapp.com'
     end
 end
