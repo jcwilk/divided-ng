@@ -12,7 +12,7 @@ module DV
           # this used to be `env:` but I changed it to `user_options:` to conform with representable
           new(obj).to_json(user_options: {
             env: {
-              "rack.url_scheme" => "https",
+              "rack.url_scheme" => Divided::URI_PROTOCOL,
               "HTTP_HOST" => Divided::CANONICAL_HOST
             }
           })

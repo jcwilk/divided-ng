@@ -9,4 +9,6 @@ module Divided
       # it defaults to 0 otherwise for some reason
       'divided.herokuapp.com'
     end
+
+  URI_PROTOCOL = Rails.env.production? ? "https" : "http"
 end
