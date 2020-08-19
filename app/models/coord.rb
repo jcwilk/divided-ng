@@ -1,11 +1,24 @@
 class Coord
-  attr_reader :x, :y
+  delegate :hash, to: :array
 
   def initialize(x, y)
-    @x, @y = x, y
+    self.array = [x, y]
+  end
+
+  def x
+    array.first
+  end
+
+  def y
+    array.second
   end
 
   def ==(other)
-    x == other.x && y == other.y
+    hash == other.hash
   end
+  alias_method :eql?, :==
+
+  private
+
+  attr_accessor :array
 end

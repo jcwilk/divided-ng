@@ -52,6 +52,8 @@ class RoundResolver
     self.room_participants = room_participants
     self.move_selections = move_selections
     self.round = round
+
+    store_join_coords
   end
 
   def call
@@ -68,9 +70,18 @@ class RoundResolver
 
   private
 
-  attr_accessor :room_participants, :move_selections, :round
+  attr_accessor :room_participants, :move_selections, :round, :join_coords
 
   delegate :participant_by_user_uuid, :participating_user_uuid?, to: :round, private: true
+
+  def store_join_coords
+    all_coords = ((0..9).to_a.product (0..9).to_a).map { |x, y| Coord.new(x, y) }
+    self.join_coords = all_coords - round.participants.map(&:coord)
+  end
+
+  def next_join_coord
+    join_coords.shift
+  end
 
   def generate_participants
     movements = continuing_participants + joining_participants
@@ -113,7 +124,7 @@ class RoundResolver
 
   def joining_participants
     room_participants.reject { |p| participating_user_uuid?(p.user_uuid) }.map do |room_participant|
-      join = MoveGenerator::Join.call
+      join = MoveGenerator::Join.call(next_join_coord)
       Movement.new(
         start_coord: join.coord,
         selected_move: join,
