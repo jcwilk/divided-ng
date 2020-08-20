@@ -8,18 +8,17 @@ describe DVChannel, type: :channel do
   end
 
   context "when subscribed to a room's current_round" do
-    let!(:pack) { Junk.round_pack }
-    let(:room) { pack[:room] }
-    let(:user_uuid) { pack[:user].uuid }
+    let(:room) { Junk.room }
+    let(:user) { Junk.user }
 
     it "streams new rounds as they come" do
-      stub_connection user_uuid: user_uuid
+      stub_connection current_user: user
 
-      subscribe rel_path: "/dv/rooms/#{room.uuid}/current_round"
+      subscribe key: "dv_room_#{room.uuid}_current_round"
 
       room.advance
 
-      broadcasted_round = last_broadcast_json("/dv/rooms/#{room.uuid}/current_round")
+      broadcasted_round = last_broadcast_json("dv_room_#{room.uuid}_current_round")
 
       expect(broadcasted_round.uuid).to eq room.current_round.uuid
     end
