@@ -11,6 +11,10 @@ describe DVChannel, type: :channel do
     let(:room) { Junk.room }
     let(:user) { Junk.user }
 
+    before do
+      allow(DeferredCall).to receive(:enqueue) # ignore queued actions
+    end
+
     it "streams new rounds as they come" do
       stub_connection current_user: user
 
