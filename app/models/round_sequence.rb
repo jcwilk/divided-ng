@@ -27,6 +27,8 @@ class RoundSequence < MemoryModel
     reset_buffers
 
     broadcast_current_round
+
+    delayed_advance(room_participants: room_participants)
   end
 
   def add_joiner(new_room_participant, room_participants:)
@@ -52,6 +54,20 @@ class RoundSequence < MemoryModel
   private
 
   attr_accessor :joiners, :move_selections, :round_uuids
+
+  def delayed_advance(room_participants:)
+    prior_round = current_round
+    Async do |task|
+      puts "sleeping..."
+      task.sleep 5
+      if current_round == prior_round
+        puts "advancing!"
+        advance(room_participants: room_participants + joiners)
+      else
+        puts "already advanced..."
+      end
+    end
+  end
 
   def reset_buffers
     self.move_selections = []

@@ -54,7 +54,11 @@ RSpec.configure do |config|
   config.include DebugHelper
 
   config.before(:each) do
+    # erase any initialized values and set it to blank for each test
     allow(MemoryModel).to receive(:global_uuid_store).and_return({})
+
+    # prevent rounds from auto-advancing
+    allow_any_instance_of(RoundSequence).to receive(:delayed_advance)
   end
 
 # The settings below are suggested to provide a good initial experience

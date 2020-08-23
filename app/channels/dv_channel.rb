@@ -12,10 +12,7 @@ class DVChannel < ApplicationCable::Channel
       uuid = matches.captures.first
       room = Room.by_uuid(uuid)
 
-      # TODO: abstract this away when someone else uses it
-      Divided::ASYNC_REACTOR.async do
-        room.join(current_user)
-      end
+      DeferredCall.enqueue(room, :join, current_user)
 
       stream_from params[:key]
       transmit Room.by_uuid(uuid).current_round.dv_hash
@@ -25,9 +22,7 @@ class DVChannel < ApplicationCable::Channel
   end
 
   def unsubscribed
-    Divided::ASYNC_REACTOR.async do
-      room.disconnected(current_user)
-    end
+    DeferredCall.enqueue(room, :disconnected, current_user)
   end
 
   private
