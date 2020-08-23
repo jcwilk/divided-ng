@@ -1,10 +1,11 @@
 require "rails_helper"
 
 describe RoundSequence do
-  subject { described_class.new(room_uuid: Junk.room.uuid) }
+  subject { described_class.new(room_uuid: Junk.room.uuid, room_participants: room_participants) }
 
   let(:user) { Junk.user }
   let(:room_participant) { Junk.room_participant(user: user) }
+  let(:room_participants) { [] }
 
   context "when new" do
     # its(:started?) { is_expected.to be false }
@@ -39,7 +40,8 @@ describe RoundSequence do
 
   context "when advancing" do
     def advance
-      subject.advance(room_participants: [room_participant])
+      room_participants << room_participant
+      subject.advance #(room_participants: [room_participant])
     end
 
     it "assigns a new round" do
@@ -65,7 +67,7 @@ describe RoundSequence do
     let(:room_participants) { room.participants }
 
     def add_selection
-      round_sequence.add_selection(move_selection, room_participants: room_participants)
+      round_sequence.add_selection(move_selection)
     end
 
     it "does not raise" do
@@ -83,7 +85,7 @@ describe RoundSequence do
       it "advances the round" do
         move2 = room.current_round.participants.find {|p| p.user_uuid == user2.uuid }.moves.first
         move_selection2 = MoveSelection.new(user_uuid: user2.uuid, move_uuid: move2.uuid )
-        round_sequence.add_selection(move_selection2, room_participants: room_participants)
+        round_sequence.add_selection(move_selection2)
         expect { add_selection }.to change { room.current_round }
       end
     end

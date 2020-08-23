@@ -8,11 +8,11 @@ class Room < MemoryModel
 
   def initialize(**)
     super
-    self.round_sequence = RoundSequence.new(room_uuid: self.uuid)
+    self.round_sequence = RoundSequence.new(room_uuid: self.uuid, room_participants: participants)
   end
 
   def advance
-    round_sequence.advance(room_participants: participants)
+    round_sequence.advance
   end
 
   def join(user)
@@ -21,21 +21,21 @@ class Room < MemoryModel
     RoomParticipant.new(user, floor: floor, room_uuid: uuid).tap do |participant|
       participants << participant
 
-      round_sequence.add_joiner(participant, room_participants: participants)
+      round_sequence.add_joiner(participant)
     end
   end
 
   def disconnected(user)
     participants.delete_if { |participant| participant.user_uuid == user.uuid }
 
-    round_sequence.advance_if_complete(participants)
+    round_sequence.advance_if_complete
   end
 
   def choose_move(move_uuid:, user_uuid:)
     raise "user not participating in room!" if participants.none? { |rp| rp.user_uuid == user_uuid }
 
     move_selection = MoveSelection.new(move_uuid: move_uuid, user_uuid: user_uuid)
-    round_sequence.add_selection(move_selection, room_participants: participants)
+    round_sequence.add_selection(move_selection)
   end
 
   private

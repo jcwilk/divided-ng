@@ -3,12 +3,13 @@
 # It hands them off to rounds to become RoundParticipants
 
 class RoundSequence < MemoryModel
-  def initialize(room_uuid:)
+  def initialize(room_uuid:, room_participants:)
     super()
 
     @room_uuid = room_uuid
 
     self.round_uuids = [Round.start.uuid]
+    self.room_participants = room_participants
 
     reset_buffers
   end
@@ -17,7 +18,7 @@ class RoundSequence < MemoryModel
     Round.by_uuid(round_uuids.last)
   end
 
-  def advance(room_participants:)
+  def advance
     round_uuids << RoundResolver.call(
       room_participants: room_participants,
       move_selections: move_selections,
@@ -28,41 +29,41 @@ class RoundSequence < MemoryModel
 
     broadcast_current_round
 
-    delayed_advance(room_participants: room_participants)
+    delayed_advance
   end
 
-  def add_joiner(new_room_participant, room_participants:)
+  def add_joiner(new_room_participant)
     raise "already joined!" if joiners.any? { |p| p.user_uuid == new_room_participant.uuid }
 
     joiners << new_room_participant
 
-    advance_if_complete(room_participants)
+    advance_if_complete
   end
 
-  def add_selection(move_selection, room_participants:)
+  def add_selection(move_selection)
     raise "user already made selection!" if move_selections.any? { |ms| ms.user_uuid == move_selection.user_uuid }
 
     move_selections << move_selection
 
-    advance_if_complete(room_participants)
+    advance_if_complete
   end
 
-  def advance_if_complete(room_participants)
-    advance(room_participants: room_participants) if full_round?(room_participants)
+  def advance_if_complete
+    advance if full_round?
   end
 
   private
 
-  attr_accessor :joiners, :move_selections, :round_uuids
+  attr_accessor :joiners, :move_selections, :round_uuids, :room_participants
 
-  def delayed_advance(room_participants:)
+  def delayed_advance
     prior_round = current_round
     Async do |task|
       puts "sleeping..."
       task.sleep 5
       if current_round == prior_round
         puts "advancing!"
-        advance(room_participants: room_participants + joiners)
+        advance
       else
         puts "already advanced..."
       end
@@ -74,7 +75,7 @@ class RoundSequence < MemoryModel
     self.joiners = []
   end
 
-  def full_round?(room_participants)
+  def full_round?
     (room_participants.map(&:user_uuid) - move_selections.map(&:user_uuid) - joiners.map(&:user_uuid)).empty?
   end
 
