@@ -29,26 +29,19 @@ tilingSprite = new PIXI.TilingSprite(
 )
 app.stage.addChild(tilingSprite)
 
-count = 0
-
-# tilingSprite.tileScale.x = 10
-# tilingSprite.tileScale.y = 10
 
 spaceTilingX = 0
 spaceTilingY = 0
+lastUuid = null
+tilingShiftScale = null
 app.ticker.add(() ->
-  count += 0.005
-
-  # tilingSprite.tileScale.x = 2 + Math.sin(count)
-  # tilingSprite.tileScale.y = 2 + Math.cos(count)
-
-  spaceTilingX += .01
-  spaceTilingY += .002
+  tilingShiftScale *= 1.015
+  spaceTilingX += .017 * tilingShiftScale
+  spaceTilingY += .002 * tilingShiftScale
 
   tilingSprite.tilePosition.x = Math.floor(spaceTilingX)
   tilingSprite.tilePosition.y = Math.floor(spaceTilingY)
 )
-
 
 
 container = new PIXI.Container()
@@ -81,6 +74,8 @@ mobContainer = new PIXI.Container()
 
 app.stage.addChild(mobContainer)
 
+currentRound = null
+
 window.GameAdapter.onNewRound = (data) ->
   mobContainer.destroy(children: true)
   mobContainer = new PIXI.Container()
@@ -103,6 +98,9 @@ window.GameAdapter.onNewRound = (data) ->
       m.buttonMode = true
       m.on('pointerdown', move.onClick)
       mobContainer.addChild(m)
+
+  currentRound = data
+  tilingShiftScale = 1.0
 
 # Resize function window
 resize = () ->
