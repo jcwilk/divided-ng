@@ -1,14 +1,16 @@
 MARGIN_PIXELS = 5;
 
 window.PIXI = require('pixi.js')
-
+PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
+#PIXI.SCALE_MODES.DEFAULT = PIXI.SCALE_MODES.NEAREST;
 window.app = new PIXI.Application({
   width: window.innerWidth,
   height: window.innerHeight
 #  resolution: 1
 })
 
-PIXI.settings.SCALE_MODE = PIXI.SCALE_MODES.NEAREST;
+
+
 
 document.querySelector('#frame').appendChild(app.view)
 
@@ -34,13 +36,15 @@ spaceTilingX = 0
 spaceTilingY = 0
 lastUuid = null
 tilingShiftScale = null
-app.ticker.add(() ->
+app.ticker.add((elapsed) ->
   tilingShiftScale *= 1.015
   spaceTilingX += .017 * tilingShiftScale
   spaceTilingY += .002 * tilingShiftScale
 
   tilingSprite.tilePosition.x = Math.floor(spaceTilingX)
   tilingSprite.tilePosition.y = Math.floor(spaceTilingY)
+
+  callback(elapsed) for callback in updateCallbacks
 )
 
 
@@ -52,12 +56,57 @@ import floorImage from '../images/floor_basic_8.gif'
 
 texture = PIXI.Texture.from(floorImage)
 
+shaderFrag = "
+precision mediump float;
+
+varying vec2 vTextureCoord;
+varying vec4 vColor;
+
+uniform sampler2D uSampler;
+uniform float colorAmount;
+uniform bool isRed;
+uniform float time;
+
+void main(void)
+{
+  vec2 uvs = vTextureCoord.xy;
+
+  vec4 fg = texture2D(uSampler, vTextureCoord);
+  float val = (fg.r+fg.g+fg.b) / 3.;
+  float power = colorAmount * 2. + 1.;
+
+  if (colorAmount > .8) {
+    float extra = colorAmount - .8;
+
+    power += 4. * extra*(.5 + sin(-vTextureCoord.x * 20. + 20.*sin(time / 40.) / 5.) / 2.);
+    power += 4. * extra*(.5 + sin(-vTextureCoord.y * 10. + time / 30.) / 2.);
+  }
+
+  vec4 outp;
+  if (isRed) {
+    outp = vec4(pow(val,1./power),pow(val,power),pow(val,power),fg.a);
+  } else {
+    outp = vec4(pow(val,power),pow(val,power),pow(val,1./power),fg.a);
+  }
+
+  gl_FragColor = outp;
+}
+"
+
+updateCallbacks = []
+
 for col in [0..9]
   for row in [0..9]
     tile = new PIXI.Sprite(texture)
     tile.x = col * 8
     tile.y = row * 8
-    container.addChild(tile)
+    do (filter = new PIXI.Filter(null, shaderFrag, {isRed: Math.random() < 0.5, colorAmount: Math.random(), time: 0})) ->
+      # filter.autofit = false
+      # filter.padding = 0
+      updateCallbacks.push((elapsed) ->
+        filter.uniforms.time += elapsed)
+      tile.filters = [filter];
+      container.addChild(tile)
 
 container.x = MARGIN_PIXELS
 container.y = MARGIN_PIXELS
