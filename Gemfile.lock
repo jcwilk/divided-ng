@@ -292,7 +292,7 @@ GEM
     tilt (2.0.10)
     timecop (0.5.9.2)
     timers (4.3.0)
-    tzinfo (1.2.7)
+    tzinfo (1.2.10)
       thread_safe (~> 0.1)
     uber (0.1.0)
     uri_template (0.7.0)
